@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
-import { useUser, useClerk } from '@clerk/clerk-react'
+import { useUser, useAuth, useClerk } from '@clerk/clerk-react'
 import { syncUser, recordResult as apiRecordResult } from '../api/client'
 
 export interface UserStats {
@@ -84,7 +84,8 @@ function formatMemberSince(date: Date | null | undefined): string {
 const AppContext = createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const { user: clerkUser, isLoaded } = useUser()
+  const { user: clerkUser } = useUser()
+  const { isLoaded, isSignedIn: clerkIsSignedIn } = useAuth()
   const { signOut: clerkSignOut } = useClerk()
   const [guestMode, setGuestModeState] = useState(false)
   const [guestGamePlayed, setGuestGamePlayed] = useState(false)
@@ -111,7 +112,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setStoredData(data)
   }
 
-  const isSignedIn = !!clerkUser
+  const isSignedIn = !!clerkIsSignedIn
 
   const user: AppUser = clerkUser
     ? {

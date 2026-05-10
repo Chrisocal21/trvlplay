@@ -1,9 +1,15 @@
 import { type ReactNode } from 'react'
+import { AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { useApp } from '../state/AppContext'
 import WelcomeScreen from '../screens/WelcomeScreen'
 
 export default function AuthGate({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, guestMode } = useApp()
+
+  // Handle the OAuth callback at /sso-callback
+  if (window.location.pathname === '/sso-callback') {
+    return <AuthenticateWithRedirectCallback />
+  }
 
   if (!isLoaded) {
     return (

@@ -10,7 +10,7 @@ export default function WelcomeScreen() {
     if (!signIn) return
     await signIn.authenticateWithRedirect({
       strategy,
-      redirectUrl: window.location.origin,
+      redirectUrl: `${window.location.origin}/sso-callback`,
       redirectUrlComplete: window.location.origin,
     })
   }

@@ -16,8 +16,8 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ClerkProvider
       publishableKey={PUBLISHABLE_KEY}
-      afterSignInUrl={window.location.origin}
-      afterSignUpUrl={window.location.origin}
+      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
     >
       <AppProvider>
         <AuthGate>
