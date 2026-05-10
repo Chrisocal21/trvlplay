@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useApp, calcCoins } from '../state/AppContext'
+import { useApp } from '../state/AppContext'
 import type { GameResult } from '../state/AppContext'
 
 interface Tile {

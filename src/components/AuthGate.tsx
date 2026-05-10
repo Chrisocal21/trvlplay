@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { useApp } from '../state/AppContext'
 import WelcomeScreen from '../screens/WelcomeScreen'
 
