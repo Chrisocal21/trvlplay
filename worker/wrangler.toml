@@ -1,0 +1,13 @@
+name = "trvlplay-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+account_id = "7accc8c4599bee1498e96c90d59e965c"
+
+[[routes]]
+pattern = "api.trvlplay.com"
+custom_domain = true
+
+[[d1_databases]]
+binding = "trvlplay_db"
+database_name = "trvlplay-db"
+database_id = "882ca391-12af-4d67-b6fb-d282494f0cc2"

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
+import { syncUser, recordResult as apiRecordResult } from '../api/client'
 
 export interface UserStats {
   played: number
@@ -132,6 +133,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stats: storedData.stats,
       }
 
+  // Sync user to D1 after Clerk loads
+  useEffect(() => {
+    if (!clerkUser) return
+    const initials = getInitials(clerkUser.fullName)
+    const friendCode = makeFriendCode(clerkUser.id, clerkUser.fullName)
+    syncUser({
+      id: clerkUser.id,
+      username: clerkUser.username ?? clerkUser.firstName ?? clerkUser.fullName ?? 'Player',
+      initials,
+      avatarColor: storedData.avatarColor,
+      friendCode,
+    }).catch(console.error)
+  }, [clerkUser?.id])
+
   function recordResult(result: GameResult) {
     const earned = calcCoins(result)
     const newData: StoredData = {
@@ -146,6 +161,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     saveData(newData)
     if (guestMode && !guestGamePlayed) setGuestGamePlayed(true)
+
+    // Persist to D1 for signed-in users
+    if (clerkUser) {
+      apiRecordResult({
+        userId: clerkUser.id,
+        puzzleId: 1, // TODO: use actual puzzle id once SortGame loads from API
+        mode: 'freeplay',
+        won: result.won,
+        strikes: result.strikes,
+        durationSeconds: result.durationSeconds,
+        coinsEarned: earned,
+      }).catch(console.error)
+    }
   }
 
   async function signOut() {
