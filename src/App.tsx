@@ -6,6 +6,7 @@ import GameGrid from './components/GameGrid'
 import BottomNav from './components/BottomNav'
 import SortGame from './screens/SortGame'
 import ProfileScreen from './screens/ProfileScreen'
+import OfflineBanner from './components/OfflineBanner'
 
 type Tab = 'games' | 'friends' | 'shop' | 'profile'
 type Screen = 'home' | 'sort'
@@ -20,6 +21,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#E1F5EE] pb-20">
+      <OfflineBanner />
       <Header />
       <main>
         {activeTab === 'games' && (
