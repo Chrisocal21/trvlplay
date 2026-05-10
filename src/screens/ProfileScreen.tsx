@@ -13,7 +13,7 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function ProfileScreen() {
-  const { user } = useApp()
+  const { user, isSignedIn, signOut } = useApp()
   const [copied, setCopied] = useState(false)
 
   function copyCode() {
@@ -62,7 +62,8 @@ export default function ProfileScreen() {
 
       <div className="px-4 -mt-4 flex flex-col gap-5">
 
-        {/* Friend code card */}
+        {/* Friend code card — signed-in users only */}
+        {isSignedIn && (
         <div className="bg-[#5DCAA5] rounded-2xl overflow-hidden flex shadow-lg">
           <div className="w-1.5 bg-[#EF9F27] shrink-0" />
           <div className="flex-1 px-4 py-4">
@@ -86,6 +87,7 @@ export default function ProfileScreen() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Stats grid */}
         <div>
@@ -144,6 +146,24 @@ export default function ProfileScreen() {
             </div>
           )}
         </div>
+
+        {/* Sign-out / sign-in */}
+        {isSignedIn ? (
+          <button
+            onClick={signOut}
+            className="w-full text-center text-[#5DCAA5] text-sm font-semibold py-2 mb-2"
+          >
+            Sign out
+          </button>
+        ) : (
+          <div className="bg-[#5DCAA5] rounded-2xl overflow-hidden flex shadow-sm">
+            <div className="w-1.5 bg-[#EF9F27] shrink-0" />
+            <div className="flex-1 px-4 py-4 text-center">
+              <p className="text-[#085041] font-black text-base">Playing as Guest</p>
+              <p className="text-[#0F6E56] text-sm mt-1">Sign in to save your coins and stats</p>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

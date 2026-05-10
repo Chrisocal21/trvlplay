@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useUser, useClerk } from '@clerk/clerk-react'
 
 export interface UserStats {
   played: number
@@ -17,28 +18,35 @@ export interface AppUser {
   stats: UserStats
 }
 
-interface AppState {
-  user: AppUser
-  recordResult: (result: GameResult) => void
-}
-
 export interface GameResult {
   won: boolean
   strikes: number
   durationSeconds: number
 }
 
-const DEFAULT_USER: AppUser = {
-  initials: 'CJ',
-  username: 'ChrisJ',
-  avatarColor: '#5DCAA5',
-  memberSince: 'May 2026',
-  friendCode: 'TRVL-CJ5XBF7',
-  coins: 0,
-  stats: { played: 0, wins: 0, streak: 0, perfect: 0 },
+interface StoredData {
+  coins: number
+  stats: UserStats
+  avatarColor: string
 }
 
-const MAX_STRIKES = 3
+interface AppState {
+  user: AppUser
+  isLoaded: boolean
+  isSignedIn: boolean
+  guestMode: boolean
+  guestGamePlayed: boolean
+  setGuestMode: () => void
+  recordResult: (result: GameResult) => void
+  signOut: () => void
+}
+
+const DEFAULT_STORED: StoredData = {
+  coins: 0,
+  stats: { played: 0, wins: 0, streak: 0, perfect: 0 },
+  avatarColor: '#5DCAA5',
+}
+
 const BASE_COINS = 100
 const STRIKE_PENALTY = 20
 const PERFECT_BONUS = 50
@@ -48,33 +56,115 @@ export function calcCoins(result: GameResult): number {
   let coins = BASE_COINS
   coins -= result.strikes * STRIKE_PENALTY
   if (result.strikes === 0) coins += PERFECT_BONUS
-  // Speed bonus: up to 30 coins for solving in under 60s
   if (result.durationSeconds < 60) {
     coins += Math.round((1 - result.durationSeconds / 60) * 30)
   }
   return Math.max(coins, 0)
 }
 
+function getInitials(name: string | null | undefined): string {
+  if (!name) return 'G'
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  return parts[0].slice(0, 2).toUpperCase()
+}
+
+function makeFriendCode(userId: string, fullName: string | null | undefined): string {
+  const initials = getInitials(fullName)
+  const suffix = userId.replace(/[^a-z0-9]/gi, '').slice(-5).toUpperCase()
+  return `TRVL-${initials}${suffix}`
+}
+
+function formatMemberSince(date: Date | null | undefined): string {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+}
+
 const AppContext = createContext<AppState | null>(null)
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AppUser>(DEFAULT_USER)
+  const { user: clerkUser, isLoaded } = useUser()
+  const { signOut: clerkSignOut } = useClerk()
+  const [guestMode, setGuestModeState] = useState(false)
+  const [guestGamePlayed, setGuestGamePlayed] = useState(false)
+
+  const userId = clerkUser?.id ?? (guestMode ? 'guest' : null)
+  const storageKey = userId ? `trvlplay_${userId}` : null
+
+  const [storedData, setStoredData] = useState<StoredData>(DEFAULT_STORED)
+
+  useEffect(() => {
+    if (!storageKey) { setStoredData(DEFAULT_STORED); return }
+    try {
+      const raw = localStorage.getItem(storageKey)
+      setStoredData(raw ? { ...DEFAULT_STORED, ...JSON.parse(raw) } : DEFAULT_STORED)
+    } catch {
+      setStoredData(DEFAULT_STORED)
+    }
+  }, [storageKey])
+
+  function saveData(data: StoredData) {
+    if (storageKey) {
+      try { localStorage.setItem(storageKey, JSON.stringify(data)) } catch { /* quota full */ }
+    }
+    setStoredData(data)
+  }
+
+  const isSignedIn = !!clerkUser
+
+  const user: AppUser = clerkUser
+    ? {
+        initials: getInitials(clerkUser.fullName),
+        username: clerkUser.username ?? clerkUser.firstName ?? clerkUser.fullName ?? 'Player',
+        avatarColor: storedData.avatarColor,
+        memberSince: formatMemberSince(clerkUser.createdAt),
+        friendCode: makeFriendCode(clerkUser.id, clerkUser.fullName),
+        coins: storedData.coins,
+        stats: storedData.stats,
+      }
+    : {
+        initials: 'G',
+        username: 'Guest',
+        avatarColor: '#9FE1CB',
+        memberSince: '',
+        friendCode: '',
+        coins: storedData.coins,
+        stats: storedData.stats,
+      }
 
   function recordResult(result: GameResult) {
     const earned = calcCoins(result)
-    setUser(prev => ({
-      ...prev,
-      coins: prev.coins + earned,
+    const newData: StoredData = {
+      ...storedData,
+      coins: storedData.coins + earned,
       stats: {
-        played: prev.stats.played + 1,
-        wins: prev.stats.wins + (result.won ? 1 : 0),
-        streak: result.won ? prev.stats.streak + 1 : 0,
-        perfect: prev.stats.perfect + (result.won && result.strikes === 0 ? 1 : 0),
+        played: storedData.stats.played + 1,
+        wins: storedData.stats.wins + (result.won ? 1 : 0),
+        streak: result.won ? storedData.stats.streak + 1 : 0,
+        perfect: storedData.stats.perfect + (result.won && result.strikes === 0 ? 1 : 0),
       },
-    }))
+    }
+    saveData(newData)
+    if (guestMode && !guestGamePlayed) setGuestGamePlayed(true)
   }
 
-  return <AppContext.Provider value={{ user, recordResult }}>{children}</AppContext.Provider>
+  async function signOut() {
+    await clerkSignOut()
+    setGuestModeState(false)
+    setGuestGamePlayed(false)
+  }
+
+  function setGuestMode() {
+    setGuestModeState(true)
+  }
+
+  return (
+    <AppContext.Provider
+      value={{ user, isLoaded, isSignedIn, guestMode, guestGamePlayed, setGuestMode, recordResult, signOut }}
+    >
+      {children}
+    </AppContext.Provider>
+  )
 }
 
 export function useApp() {
