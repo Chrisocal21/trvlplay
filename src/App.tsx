@@ -6,6 +6,7 @@ import GameGrid from './components/GameGrid'
 import BottomNav from './components/BottomNav'
 import SortGame from './screens/SortGame'
 import ProfileScreen from './screens/ProfileScreen'
+import FriendsScreen from './screens/FriendsScreen'
 import OfflineBanner from './components/OfflineBanner'
 
 type Tab = 'games' | 'friends' | 'shop' | 'profile'
@@ -31,9 +32,7 @@ function App() {
           </>
         )}
         {activeTab === 'profile' && <ProfileScreen />}
-        {activeTab === 'friends' && (
-          <div className="px-4 pt-8 text-center text-[#085041] font-black text-lg">Friends coming soon</div>
-        )}
+        {activeTab === 'friends' && <FriendsScreen />}
         {activeTab === 'shop' && (
           <div className="px-4 pt-8 text-center text-[#085041] font-black text-lg">Shop coming soon</div>
         )}

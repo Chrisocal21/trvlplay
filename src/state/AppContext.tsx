@@ -134,7 +134,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stats: storedData.stats,
       }
 
-  // Sync user to D1 after Clerk loads
+  // Sync user to D1 after Clerk loads — hydrate coins/stats from D1 as source of truth
   useEffect(() => {
     if (!clerkUser) return
     const initials = getInitials(clerkUser.fullName)
@@ -145,6 +145,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       initials,
       avatarColor: storedData.avatarColor,
       friendCode,
+    }).then((res: { user?: { coins?: number; played?: number; wins?: number; streak?: number; perfect?: number } }) => {
+      const remote = res?.user
+      if (!remote) return
+      // Use D1 as source of truth — take the higher coin value to protect local offline plays
+      setStoredData(prev => {
+        const merged: StoredData = {
+          ...prev,
+          coins: Math.max(prev.coins, remote.coins ?? 0),
+          stats: {
+            played: Math.max(prev.stats.played, remote.played ?? 0),
+            wins: Math.max(prev.stats.wins, remote.wins ?? 0),
+            streak: Math.max(prev.stats.streak, remote.streak ?? 0),
+            perfect: Math.max(prev.stats.perfect, remote.perfect ?? 0),
+          },
+        }
+        if (storageKey) {
+          try { localStorage.setItem(storageKey, JSON.stringify(merged)) } catch { /* quota */ }
+        }
+        return merged
+      })
     }).catch(console.error)
   }, [clerkUser?.id])
 
