@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+* {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   15%       { transform: translateX(-6px); }

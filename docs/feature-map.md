@@ -65,19 +65,22 @@ A lightweight, playful collection of thinking games -- word puzzles, grouping ga
 ### Coin Economy
 
 - Earn-only currency -- no real money purchases in MVP or soft launch
-- Coins earned from: completing games, daily bonus, streaks, perfect games
+- Coins earned from: completing games (base 100, -20 per strike, +50 perfect, up to +30 speed bonus)
 - Coin balance visible in header across all screens
 - Amber color reserved for all coin-related UI
+- Streak multiplier and speed bonus formula flagged for post-testing tuning
+- Phase 2 will add a second earn-only currency (streak gems) exclusive to daily completions -- see Phase 2
 
 ---
 
 ### Cosmetic Shop (Soft Launch)
 
-- Avatar colors (swap the circle color behind initials)
-- Game themes (alternate color schemes for the Sort tile grid)
-- Card backs (different accent colors on profile card when friends view it)
-- Minimal cosmetics until real usage data drives expansion
-- Shop will remain limited for the entire soft launch period -- no fixed timeline for expansion
+- Avatar colors (8 options: teal free, others 150-500 coins)
+- Game themes (4 options: classic free, others 400-600 coins)
+- Card backs (4 options: teal free, others 250-350 coins)
+- All items purchased with coins -- no real money in soft launch
+- Minimal cosmetics until real usage data drives what to add next
+- Phase 2 will add a premium section purchasable with streak gems only
 
 ---
 
@@ -154,9 +157,18 @@ A lightweight, playful collection of thinking games -- word puzzles, grouping ga
 ### Daily Challenges
 
 - Cross-game daily challenge system
-- Reward structure for daily completion
-- Streak tracking and streak rewards
 - UTC reset with countdown (same as daily Sort)
+
+---
+
+### Streak Gems (Second Currency)
+
+- Earned exclusively by completing the daily puzzle each day
+- Cannot be earned through free play -- daily login only
+- Separate balance from coins, shown in header alongside coins
+- Used to unlock a premium section of the shop (limited-edition cosmetics not available with coins)
+- This creates a daily return loop beyond coins alone
+- Paid premium currency (Phase 3) will layer on top of this once we have usage data on what players actually want
 
 ---
 

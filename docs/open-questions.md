@@ -15,7 +15,7 @@ Questions that have come up and are not yet resolved.
 | What is the final UX when a guest tries to play a second time? | Currently returns to WelcomeScreen. May want a softer nudge instead of a hard wall. |
 | What game themes are available at launch for Sort? | Alternate color schemes for the tile grid -- need to design them. |
 | What card back options are available at launch? | Accent color variations for profile cards when friends view. |
-| What are the coin prices for each cosmetic item? | Economy balance -- prices too low and coins feel worthless, too high and the grind feels punishing. |
+
 | How does conflict resolution work when someone plays offline and online simultaneously? | Edge case but needs a clear rule. Last write wins? Merge? |
 | What are the minimum supported browsers and devices? | Affects testing scope and PWA behavior. |
 | What does the speed bonus formula look like? | Needs to reward fast solves without punishing careful thinkers. |
@@ -63,6 +63,8 @@ Questions that have been resolved. Kept here so nothing gets repeated.
 | What visual personality? | Playful but clean, all ages, easy on eyes for extended play | May 9, 2026 |
 | White backgrounds? | No. Colored card fills throughout. | May 9, 2026 |
 | What avatar colors are available at launch? | 8 options: teal (#5DCAA5), blue (#185FA5), amber (#EF9F27), coral (#E24B4A), indigo (#6366F1), mint (#A7F3D0), slate (#64748B), gold (#F59E0B) | May 10, 2026 |
+| What are the coin prices for cosmetic items? | Avatars 0-500, themes 0-600, card backs 0-350. Full table in ShopScreen.tsx. | May 10, 2026 |
+| Will there be a second currency? | Yes -- streak gems in Phase 2. Earned daily-only, spent on premium shop items. Paid currency in Phase 3 after usage data. | May 10, 2026 |
 
 ---
 

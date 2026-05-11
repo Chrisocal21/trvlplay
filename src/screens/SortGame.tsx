@@ -123,7 +123,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
 
   function endGame(won: boolean, finalStrikes: number) {
     const duration = Math.round((Date.now() - startTime.current) / 1000)
-    setResult({ won, strikes: finalStrikes, durationSeconds: duration, puzzleId, mode })
+    setResult({ won, strikes: finalStrikes, durationSeconds: duration, streak: user.stats.streak, puzzleId, mode })
   }
 
   function handleSubmit() {
@@ -322,7 +322,10 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
               const speedBonus = result.durationSeconds < 60
                 ? Math.round((1 - result.durationSeconds / 60) * 30)
                 : 0
-              const total = base - penalty + perfectBonus + speedBonus
+              const subtotal = base - penalty + perfectBonus + speedBonus
+              const streakMultiplier = result.streak > 1 ? Math.min((result.streak - 1) * 0.05, 0.5) : 0
+              const streakBonus = streakMultiplier > 0 ? Math.round(subtotal * streakMultiplier) : 0
+              const total = subtotal + streakBonus
               return (
                 <div className="rounded-2xl bg-[#5DCAA5] overflow-hidden flex shadow-sm">
                   <div className="w-1.5 bg-[#EF9F27] shrink-0" />
@@ -348,6 +351,12 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
                       <div className="flex justify-between text-sm">
                         <span className="text-[#0F6E56] font-semibold">Speed bonus</span>
                         <span className="text-[#085041] font-black">+{speedBonus}</span>
+                      </div>
+                    )}
+                    {streakBonus > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-[#0F6E56] font-semibold">{result.streak}-day streak</span>
+                        <span className="text-[#085041] font-black">+{streakBonus}</span>
                       </div>
                     )}
                     <div className="border-t border-[#9FE1CB] mt-1 pt-2 flex justify-between items-center">

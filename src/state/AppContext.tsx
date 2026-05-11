@@ -26,6 +26,7 @@ export interface GameResult {
   won: boolean
   strikes: number
   durationSeconds: number
+  streak: number          // streak at the time the game ended (before this result updates it)
   puzzleId?: number
   mode?: 'daily' | 'freeplay'
 }
@@ -77,6 +78,8 @@ const DEFAULT_STORED: StoredData = {
 const BASE_COINS = 100
 const STRIKE_PENALTY = 20
 const PERFECT_BONUS = 50
+// Speed bonus: up to +30 for solving under 60 seconds (linear, 0 at 60s+)
+// Streak multiplier: +5% per streak day beyond 1, capped at +50% (streak 11+)
 
 export function calcCoins(result: GameResult): number {
   if (!result.won) return 0
@@ -85,6 +88,10 @@ export function calcCoins(result: GameResult): number {
   if (result.strikes === 0) coins += PERFECT_BONUS
   if (result.durationSeconds < 60) {
     coins += Math.round((1 - result.durationSeconds / 60) * 30)
+  }
+  if (result.streak > 1) {
+    const multiplier = 1 + Math.min((result.streak - 1) * 0.05, 0.5)
+    coins = Math.round(coins * multiplier)
   }
   return Math.max(coins, 0)
 }
