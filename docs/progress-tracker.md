@@ -1,130 +1,137 @@
 # TrvlPlay -- Progress Tracker
 
-**Overall progress:** 0%
-**Last updated:** May 9, 2026
+**Overall progress:** ~75%
+**Last updated:** May 10, 2026
 **Status:** Active -- Soft Launch (no fixed timeline)
 
 ---
 
 ## Phase 1 -- MVP
 
-**Phase progress:** 0%
+**Phase progress:** ~75%
 **Goal:** One game, one profile, one economy. Prove the core loop works.
 
 ---
 
 ### Feature 1.1 -- Sort (Flagship Game)
-**Progress:** 0%
+**Progress:** 90%
 
-- [ ] Define final game rules (16 items, 4 groups of 4, 3 strikes -- confirmed)
-- [ ] Name confirmed: Sort
-- [ ] Design difficulty tiers (easy, medium, hard) -- define what makes each tier different
-- [ ] Build the shared word bank structure in D1 with difficulty, category, and length tags
-- [ ] Populate initial word bank (minimum viable set for launch)
-- [ ] Create first 30 hand-curated puzzles (covers one month of daily puzzles plus free play)
-- [ ] Build the scoring system (base 100, -20 per strike, speed bonus, perfect +50, streak multiplier)
-- [ ] Build daily Sort with UTC reset and countdown timer on home screen
-- [ ] Build free play mode pulling from the puzzle bank
-- [ ] Implement per-player word tracking so no repeats until pool is exhausted
-- [ ] Design and build win state screen with coin reward display
-- [ ] Design and build lose state screen (3 strikes)
+- [x] Define final game rules (16 items, 4 groups of 4, 3 strikes -- confirmed)
+- [x] Name confirmed: Sort
+- [ ] Design difficulty tiers (easy, medium, hard) -- what makes each tier different is still open
+- [x] Build the puzzle structure in D1 (daily_date, difficulty, 4 labeled groups of 4 items)
+- [x] Create daily puzzles -- May 17-31 and all of June seeded and applied to D1
+- [x] Build the scoring system (base 100, -20 per strike, perfect +50 -- speed bonus and streak multiplier flagged)
+- [x] Build daily Sort with UTC reset and countdown timer on home screen
+- [x] Build free play mode pulling from the puzzle bank (Worker GET /api/puzzles/freeplay)
+- [x] Implement per-player puzzle tracking (server-side dedup via game_results; guest-side via excludeIds list)
+- [x] Build win state screen with coin breakdown (streak card, coins earned, perfect bonus shown)
+- [x] Build lose state screen (unsolved groups revealed with red accent, result card shown)
 
 ---
 
 ### Feature 1.2 -- Guest Play
-**Progress:** 0%
+**Progress:** 90%
 
-- [ ] Build guest play flow -- one round without an account
-- [ ] Design the post-game prompt to create a profile
-- [ ] Define behavior when guest tries to play a second time without signing up
-- [ ] Build guest data carry-over on account creation (stats and coins from first game transfer)
+- [x] Build guest play flow -- one round without an account (guestMode state in AppContext)
+- [x] Design the post-game sign-up nudge (shown at result screen bottom when guestMode is true)
+- [ ] Final behavior when guest tries to play a second time without signing up -- currently exitGuestMode is called which returns to WelcomeScreen; may want to revisit UX
+- [x] Build guest data carry-over on account creation (guest localStorage merged into new Clerk account on first sign-in)
 
 ---
 
 ### Feature 1.3 -- Profile System
-**Progress:** 0%
+**Progress:** 95%
 
-- [ ] Set up Clerk with Google and Apple sign-in
-- [ ] Build profile creation flow (username, avatar color selection)
-- [ ] Generate friend code on profile creation (TRVL-[initials][5 random chars])
-- [ ] Build profile screen (avatar, username, friend code, stats, coin balance)
-- [ ] Connect Clerk user ID to all game and profile data in D1
-- [ ] Build session handling and token refresh
+- [x] Set up Clerk with Google and Apple sign-in (pk_test live, deployed)
+- [x] Build first-time onboarding screen (username + avatar color picker, setupComplete flag)
+- [x] Generate friend code on profile creation (TRVL-[initials][5 random chars], stored in D1)
+- [x] Build profile screen (avatar circle, username, friend code copy/share, stats grid, coin balance)
+- [x] Build inline profile editing (username + avatar color, saved to localStorage and synced to D1)
+- [x] Connect Clerk user ID to all game and profile data in D1
+- [x] Avatar color syncs to D1 on every syncUser call (Worker ON CONFLICT now updates avatar_color)
 
 ---
 
 ### Feature 1.4 -- Friend System
-**Progress:** 0%
+**Progress:** 60%
 
-- [ ] Build friend code sharing (copy, native share sheet)
-- [ ] Build add friend flow via friend code input
-- [ ] Build friend request acceptance flow
-- [ ] Build friend list view (name, avatar, streak, last active, online status)
-- [ ] Design empty friend state ("Add a friend to see how you stack up" with code and share button)
-- [ ] Define what is visible on a friend's profile when viewing it
+- [x] Build friend code sharing (copy button + native share sheet in profile screen)
+- [x] Build add friend flow via friend code input (FriendsScreen with input field)
+- [x] Build friend request acceptance/rejection flow (Worker endpoints, FriendsScreen UI)
+- [x] Build friend list view (name, avatar initials, streak, last active)
+- [x] Design empty friend state ("Add a friend to see how you stack up")
+- [ ] Online status indicator (not yet built -- last active shown but no live presence)
+- [ ] Define what is visible on a friend's profile when viewing it (open question)
 
 ---
 
 ### Feature 1.5 -- Coin Economy
-**Progress:** 0%
+**Progress:** 85%
 
-- [ ] Build coin earning system (per game, per streak, daily bonus, perfect bonus)
-- [ ] Set initial coin reward amounts for all actions
-- [ ] Build coin balance display in header (amber coin icon + count)
-- [ ] Store coin balance and transaction history in D1
-- [ ] Enforce earn-only constraint -- no purchase flow in MVP
+- [x] Build coin earning (base 100 per game, -20 per strike, +50 perfect)
+- [x] Speed bonus placeholder in scoring -- formula not yet defined
+- [x] Streak multiplier placeholder -- curve not yet defined
+- [x] Build coin balance display in header (amber coin circle + count)
+- [x] Store coin balance in D1 (user_coins table) with local cache in localStorage
+- [x] Enforce earn-only constraint (no purchase flow beyond cosmetics)
 
 ---
 
 ### Feature 1.6 -- Cosmetic Shop
-**Progress:** 0%
+**Progress:** 70%
 
-- [ ] Define available avatar colors at launch
-- [ ] Define available game themes at launch (alternate color schemes for Sort tiles)
-- [ ] Define available card backs at launch
-- [ ] Set coin prices for each cosmetic item
-- [ ] Build shop screen layout
-- [ ] Build cosmetic purchase flow (spend coins, unlock item)
-- [ ] Build cosmetic application (select and apply owned cosmetics)
+- [x] Define available avatar colors (8 options: teal, blue, amber, coral, indigo, mint, slate, gold)
+- [ ] Define available game themes -- not yet designed
+- [ ] Define available card backs -- not yet designed
+- [ ] Set coin prices for each cosmetic item (open question)
+- [x] Build shop screen layout (ShopScreen.tsx -- avatar colors + placeholder sections)
+- [x] Build cosmetic purchase flow (Worker buyItem + equipItem endpoints, inventory table in D1)
+- [x] Build cosmetic application (equipped avatar color applies to header avatar and profile)
 
 ---
 
 ### Feature 1.7 -- Offline Mode
-**Progress:** 0%
+**Progress:** 75%
 
-- [ ] Set up service worker for offline caching
-- [ ] Build puzzle pre-caching (7 puzzles stored locally)
-- [ ] Build local storage for profile, coin balance, and game state
-- [ ] Build sync logic when connection returns
-- [ ] Build conflict resolution for offline/online overlap
-- [ ] Design and build offline indicator UI
+- [x] Set up service worker via vite-plugin-pwa (dev-dist/sw.js generated)
+- [x] Build puzzle pre-caching (puzzleCache.ts -- up to 7 puzzles in localStorage)
+- [x] Background puzzle prefetch at app startup (App.tsx useEffect, fills cache to 7)
+- [x] Puzzle fallback from cache when offline (SortGame fetches from cache if network fails)
+- [x] Build offline indicator UI (OfflineBanner.tsx -- shown when navigator.onLine is false)
+- [ ] Full sync logic when connection returns -- partial (coins and stats sync on next sign-in; no explicit sync trigger yet)
+- [ ] Conflict resolution for offline/online overlap -- not yet defined (open question)
 
 ---
 
 ### Feature 1.8 -- PWA Setup
-**Progress:** 0%
+**Progress:** 70%
 
-- [ ] Configure service worker in Vite build
-- [ ] Create app manifest (icon, name, splash screen, theme color matching TrvlPlay palette)
+- [x] Configure service worker in Vite build (vite-plugin-pwa)
+- [x] Create app manifest (public/manifest.webmanifest -- name, theme color, display standalone)
+- [ ] App icon -- not yet designed (open question -- needed for manifest and install prompt)
 - [ ] Test install flow on iOS Safari
 - [ ] Test install flow on Android Chrome
-- [ ] Define and document minimum supported browsers and devices
+- [ ] Define minimum supported browsers and devices (open question)
 
 ---
 
 ### Feature 1.9 -- Visual Design and Frontend
-**Progress:** 0%
+**Progress:** 85%
 
-- [ ] Finalize color palette tokens (soft teal, deep blue, amber, dark teal -- confirmed direction)
-- [ ] Build home screen layout (dark teal header, daily Sort card, stats, game grid, bottom nav)
-- [ ] Build Sort gameplay screen (solved groups, tile grid, strikes, shuffle, submit)
-- [ ] Build profile screen
-- [ ] Build shop screen
-- [ ] Build friend list screen
-- [ ] Implement left accent bar framing motif across all card components
-- [ ] Implement colored card fills (no white backgrounds)
-- [ ] Build bottom navigation (Games, Friends, Shop, Profile)
-- [ ] Build UTC countdown timer component for home screen
+- [x] Finalize color palette tokens (all colors hardcoded via Tailwind arbitrary values)
+- [x] Build home screen (dark teal header, daily Sort card, stats, game grid, bottom nav)
+- [x] Build Sort gameplay screen (solved groups stack at top, tile grid, strikes, shuffle, submit)
+- [x] Build profile screen (avatar, username, friend code, stats, edit mode)
+- [x] Build shop screen (avatar colors, placeholder for themes and card backs)
+- [x] Build friends screen (add friend input, pending requests, friend list)
+- [x] Build onboarding screen (first-time username + color setup)
+- [x] Build welcome screen (sign-in prompt, guest play option)
+- [x] Left accent bar motif across all card components
+- [x] Colored card fills throughout (no white backgrounds)
+- [x] Bottom navigation (Games, Friends, Shop, Profile tabs)
+- [x] UTC countdown timer on home screen below daily Sort card
+- [ ] Typography / font not yet decided (open question)
 
 ---
 

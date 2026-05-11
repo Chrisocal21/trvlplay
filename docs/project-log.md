@@ -6,13 +6,68 @@
 
 | Project | Status | Last Session | Next Focus |
 |---|---|---|---|
-| TrvlPlay | Active -- Soft Launch | May 9, 2026 | Set up repo, build home screen, define D1 schema |
+| TrvlPlay | Active -- Soft Launch | May 10, 2026 | App icon, friends screen polish, coin prices, font decision |
 
 ---
 
 ## Session History
 
 All entries below, newest first.
+
+---
+
+## TrvlPlay -- Session 2 -- May 10, 2026
+
+**Status:** Active -- Soft Launch (~75% MVP complete)
+
+---
+
+### What We Built
+
+- Full Sort gameplay screen -- tile grid, group solving, strikes, shuffle, submit
+- Win and lose result screens -- coin breakdown on win, unsolved groups revealed on loss
+- Guest play flow -- guestMode state, single-game gate, sign-up nudge on result screen
+- Guest data carry-over -- first game stats and coins merge into new Clerk account on sign-in
+- Per-player puzzle deduplication -- server-side via game_results subquery for signed-in users; client-supplied excludeIds list for guests
+- First-time onboarding screen -- username + avatar color picker; setupComplete flag gates it
+- Profile inline editing -- username and avatar color, saved to localStorage and synced to D1
+- Offline puzzle cache -- puzzleCache.ts stores up to 7 puzzles in localStorage; background prefetch fills cache at startup; SortGame falls back to cache when offline
+- Friends screen -- add friend by code, pending requests, friend list with avatar and streak
+- Shop screen -- avatar color purchases, inventory tracked in D1
+- Worker syncUser bug fix -- avatar_color now included in ON CONFLICT UPDATE clause
+- June 2026 daily puzzles -- 30 puzzles seeded to D1 (June 1-30, mix of easy/medium/hard)
+- App deployed to trvlplay.com after each major feature via Vercel
+
+---
+
+### What Was Decided
+
+- Guest second-game behavior: currently calls exitGuestMode (returns to WelcomeScreen) -- may revisit UX
+- Avatar colors at onboarding: 8 options (teal, blue, amber, coral, indigo, mint, slate, gold)
+- Clerk is live with pk_test key; Google and Apple sign-in working in production
+- Puzzles stored as four labeled groups of JSON arrays in D1 -- no separate word bank table built
+- Speed bonus and streak multiplier are placeholders in scoring -- formulas not yet defined
+- Shop items have no prices set yet -- coin prices are still an open question
+
+---
+
+### What Changed
+
+- progress-tracker.md: all features updated from 0% to reflect actual build state
+- open-questions.md: answered questions moved to resolved section
+
+---
+
+### Open Questions Added
+
+- None new -- all open questions carried from Session 1 still apply
+
+---
+
+### Open Questions Resolved
+
+- Guest data carry-over behavior: implemented (localStorage merge on first sign-in)
+- Avatar colors available at launch: 8 defined (teal, blue, amber, coral, indigo, mint, slate, gold)
 
 ---
 

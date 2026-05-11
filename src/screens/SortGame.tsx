@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../state/AppContext'
 import type { GameResult } from '../state/AppContext'
 import { getDailyPuzzle, getFreePuzzle } from '../api/client'
+import { cachePuzzle, popCachedPuzzle } from '../api/puzzleCache'
 
 interface Tile {
   id: number
@@ -47,11 +48,12 @@ const MAX_STRIKES = 3
 
 interface Props {
   onBack: () => void
+  onSignUp?: () => void
   mode?: 'daily' | 'freeplay'
 }
 
-export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
-  const { recordResult } = useApp()
+export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props) {
+  const { recordResult, user, userId, guestMode } = useApp()
   const [puzzle, setPuzzle] = useState<Group[] | null>(null)
   const [puzzleId, setPuzzleId] = useState<number>(0)
   const [loading, setLoading] = useState(true)
@@ -61,11 +63,12 @@ export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
   const [strikes, setStrikes] = useState(0)
   const [shaking, setShaking] = useState(false)
   const [result, setResult] = useState<GameResult | null>(null)
+  const [guestSeenIds, setGuestSeenIds] = useState<number[]>([])
   const startTime = useRef(Date.now())
 
   // Fetch puzzle from API on mount
   useEffect(() => {
-    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle()
+    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId)
     fetch
       .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[] } }) => {
         const groups: Group[] = res.puzzle.groups.map((g, i) => ({
@@ -76,11 +79,26 @@ export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
         setPuzzleId(res.puzzle.id)
         setPuzzle(groups)
         setTiles(buildTiles(groups))
+        if (!userId && mode === 'freeplay') setGuestSeenIds(prev => [...prev, res.puzzle.id])
+        // Cache free-play puzzles for offline use
+        if (mode === 'freeplay') cachePuzzle({ id: res.puzzle.id, groups: res.puzzle.groups })
       })
       .catch(() => {
-        // API unavailable — use fallback
-        setPuzzle(FALLBACK_PUZZLE)
-        setTiles(buildTiles(FALLBACK_PUZZLE))
+        // API unavailable — serve from local cache, fall back to hardcoded if empty
+        const cached = popCachedPuzzle()
+        if (cached) {
+          const groups: Group[] = cached.groups.map((g, i) => ({
+            label: g.label,
+            color: GROUP_COLORS[i],
+            tiles: g.items,
+          }))
+          setPuzzleId(cached.id)
+          setPuzzle(groups)
+          setTiles(buildTiles(groups))
+        } else {
+          setPuzzle(FALLBACK_PUZZLE)
+          setTiles(buildTiles(FALLBACK_PUZZLE))
+        }
       })
       .finally(() => setLoading(false))
   }, [mode])
@@ -138,6 +156,45 @@ export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
     setTiles(prev => shuffle(prev))
   }
 
+  function handlePlayAgain() {
+    setResult(null)
+    setStrikes(0)
+    setSolvedGroups([])
+    setSelected(new Set())
+    setLoading(true)
+    startTime.current = Date.now()
+    getFreePuzzle(userId, userId ? [] : guestSeenIds)
+      .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[] } }) => {
+        const groups: Group[] = res.puzzle.groups.map((g, i) => ({
+          label: g.label,
+          color: GROUP_COLORS[i],
+          tiles: g.items,
+        }))
+        setPuzzleId(res.puzzle.id)
+        setPuzzle(groups)
+        setTiles(buildTiles(groups))
+        if (!userId) setGuestSeenIds(prev => [...prev, res.puzzle.id])
+        cachePuzzle({ id: res.puzzle.id, groups: res.puzzle.groups })
+      })
+      .catch(() => {
+        const cached = popCachedPuzzle(userId ? [] : guestSeenIds)
+        if (cached) {
+          const groups: Group[] = cached.groups.map((g, i) => ({
+            label: g.label,
+            color: GROUP_COLORS[i],
+            tiles: g.items,
+          }))
+          setPuzzleId(cached.id)
+          setPuzzle(groups)
+          setTiles(buildTiles(groups))
+        } else {
+          setPuzzle(FALLBACK_PUZZLE)
+          setTiles(buildTiles(FALLBACK_PUZZLE))
+        }
+      })
+      .finally(() => setLoading(false))
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#E1F5EE] flex flex-col">
@@ -188,35 +245,74 @@ export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
           </div>
         ))}
 
-        {/* Strikes */}
-        <div className="flex items-center gap-2.5">
-          <span className="text-[#085041] text-xs font-black uppercase tracking-widest">Strikes</span>
-          <div className="flex gap-2">
-            {Array.from({ length: MAX_STRIKES }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                  i < strikes ? 'bg-[#E24B4A] scale-110' : 'bg-[#9FE1CB]'
-                }`}
-              />
-            ))}
+        {/* Strikes — hidden once game ends */}
+        {!result && (
+          <div className="flex items-center gap-2.5">
+            <span className="text-[#085041] text-xs font-black uppercase tracking-widest">Strikes</span>
+            <div className="flex gap-2">
+              {Array.from({ length: MAX_STRIKES }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                    i < strikes ? 'bg-[#E24B4A] scale-110' : 'bg-[#9FE1CB]'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Tile grid or result screen */}
         {result ? (
-          <div className="flex-1 flex flex-col gap-4">
+          <div className="flex-1 flex flex-col gap-3">
+
+            {/* Reveal unsolved groups on loss */}
+            {!result.won && puzzle!.filter(g => !solvedGroups.some(sg => sg.label === g.label)).map(group => (
+              <div key={group.label} className="rounded-2xl overflow-hidden flex shadow-sm opacity-70">
+                <div className="w-1.5 bg-[#E24B4A] shrink-0" />
+                <div className="flex-1 px-4 py-3" style={{ backgroundColor: group.color }}>
+                  <p className="text-[#085041] text-[10px] font-black uppercase tracking-[0.14em]">{group.label}</p>
+                  <p className="text-[#085041] text-sm font-bold mt-0.5">{group.tiles.join(' · ')}</p>
+                </div>
+              </div>
+            ))}
+
+            {/* Result header */}
             <div className="rounded-3xl bg-[#5DCAA5] overflow-hidden flex shadow-xl">
               <div className={`w-1.5 shrink-0 ${result.won ? 'bg-[#085041]' : 'bg-[#E24B4A]'}`} />
-              <div className="flex-1 px-5 py-6">
-                <p className="text-[#085041] text-[11px] font-black uppercase tracking-[0.15em] mb-1">
-                  {result.won ? 'Sorted!' : 'Nice try'}
+              <div className="flex-1 px-5 py-5 flex flex-col gap-1">
+                <p className="text-[#085041] text-[11px] font-black uppercase tracking-[0.15em]">
+                  {result.won ? (mode === 'daily' ? 'Daily Sort' : 'Sort') : 'Game over'}
                 </p>
-                <h2 className="text-[#085041] text-3xl font-black leading-tight tracking-tight">
-                  {result.won ? 'You found all 4 groups.' : 'You used all your strikes.'}
+                <h2 className="text-[#085041] text-2xl font-black leading-tight tracking-tight">
+                  {result.won ? 'All 4 groups found.' : 'You used all your strikes.'}
                 </h2>
+                <div className="flex items-center gap-2 mt-2">
+                  {Array.from({ length: MAX_STRIKES }).map((_, i) => (
+                    <div key={i} className={`w-3 h-3 rounded-full ${i < result.strikes ? 'bg-[#E24B4A]' : 'bg-[#9FE1CB]'}`} />
+                  ))}
+                  <span className="text-[#0F6E56] text-xs font-bold ml-1">
+                    {result.strikes === 0 ? 'No strikes' : `${result.strikes} strike${result.strikes !== 1 ? 's' : ''}`}
+                  </span>
+                  {result.won && (
+                    <span className="ml-auto text-[#0F6E56] text-xs font-bold">
+                      {Math.floor(result.durationSeconds / 60)}:{String(result.durationSeconds % 60).padStart(2, '0')}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Streak */}
+            {result.won && user.stats.streak > 0 && (
+              <div className="rounded-2xl bg-[#5DCAA5] overflow-hidden flex shadow-sm">
+                <div className="w-1.5 bg-[#085041] shrink-0" />
+                <div className="flex-1 px-4 py-4 flex items-center justify-between">
+                  <span className="text-[#085041] font-black text-sm">Current streak</span>
+                  <span className="text-[#085041] font-black text-2xl">{user.stats.streak}</span>
+                </div>
+              </div>
+            )}
 
             {/* Coin breakdown */}
             {result.won && (() => {
@@ -266,12 +362,46 @@ export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
               )
             })()}
 
-            <button
-              onClick={onBack}
-              className="w-full bg-[#185FA5] text-[#E1F5EE] font-bold rounded-2xl py-4 text-base shadow-lg mt-auto"
-            >
-              Back to home
-            </button>
+            {/* Actions */}
+            <div className="flex flex-col gap-3 mt-auto pt-2">
+              {mode === 'freeplay' && (
+                <button
+                  onClick={handlePlayAgain}
+                  className="w-full bg-[#185FA5] text-[#E1F5EE] font-bold rounded-2xl py-4 text-base shadow-lg"
+                >
+                  Play again
+                </button>
+              )}
+              <button
+                onClick={onBack}
+                className={`w-full font-bold rounded-2xl py-4 text-base ${
+                  mode === 'freeplay'
+                    ? 'bg-[#9FE1CB] text-[#085041] shadow-sm'
+                    : 'bg-[#185FA5] text-[#E1F5EE] shadow-lg'
+                }`}
+              >
+                Back to home
+              </button>
+            </div>
+
+            {/* Guest sign-up nudge */}
+            {guestMode && (
+              <div className="rounded-2xl bg-[#5DCAA5] overflow-hidden flex shadow-sm">
+                <div className="w-1.5 bg-[#185FA5] shrink-0" />
+                <div className="flex-1 px-4 py-4 flex flex-col gap-3">
+                  <div>
+                    <p className="text-[#085041] font-black text-sm">Save your progress</p>
+                    <p className="text-[#0F6E56] text-xs mt-0.5">Create a free account to keep your stats, coins, and streak.</p>
+                  </div>
+                  <button
+                    onClick={onSignUp}
+                    className="w-full bg-[#185FA5] text-[#E1F5EE] font-bold rounded-xl py-3 text-sm shadow-sm"
+                  >
+                    Create account
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div

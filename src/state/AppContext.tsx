@@ -19,6 +19,7 @@ export interface AppUser {
   stats: UserStats
   playHistory: string[]
   dailyPlayedDate: string
+  setupComplete: boolean
 }
 
 export interface GameResult {
@@ -33,18 +34,24 @@ interface StoredData {
   coins: number
   stats: UserStats
   avatarColor: string
+  customUsername: string   // set during onboarding, overrides Clerk name
   playHistory: string[]  // ISO date strings 'YYYY-MM-DD' of days played
   dailyPlayedDate: string  // last date a daily Sort was completed, 'YYYY-MM-DD' or ''
+  setupComplete: boolean  // true after first-time onboarding is submitted
 }
 
 interface AppState {
   user: AppUser
+  userId: string | null
   isLoaded: boolean
   isSignedIn: boolean
   guestMode: boolean
   guestGamePlayed: boolean
   inventory: InventoryItem[]
   setGuestMode: () => void
+  exitGuestMode: () => void
+  completeSetup: (username: string, avatarColor: string) => Promise<void>
+  updateProfile: (username: string, avatarColor: string) => Promise<void>
   recordResult: (result: GameResult) => void
   buyItem: (itemType: string, itemId: string, price: number) => Promise<void>
   equipItem: (itemType: string, itemId: string) => Promise<void>
@@ -61,8 +68,10 @@ const DEFAULT_STORED: StoredData = {
   coins: 0,
   stats: { played: 0, wins: 0, streak: 0, perfect: 0 },
   avatarColor: '#5DCAA5',
+  customUsername: '',
   playHistory: [],
   dailyPlayedDate: '',
+  setupComplete: false,
 }
 
 const BASE_COINS = 100
@@ -135,7 +144,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const user: AppUser = clerkUser
     ? {
         initials: getInitials(clerkUser.fullName),
-        username: clerkUser.username ?? clerkUser.firstName ?? clerkUser.fullName ?? 'Player',
+        username: storedData.customUsername || clerkUser.username || clerkUser.firstName || clerkUser.fullName || 'Player',
         avatarColor: storedData.avatarColor,
         memberSince: formatMemberSince(clerkUser.createdAt),
         friendCode: makeFriendCode(clerkUser.id, clerkUser.fullName),
@@ -143,6 +152,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stats: storedData.stats,
         playHistory: storedData.playHistory,
         dailyPlayedDate: storedData.dailyPlayedDate,
+        setupComplete: storedData.setupComplete,
       }
     : {
         initials: 'G',
@@ -154,6 +164,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stats: storedData.stats,
         playHistory: storedData.playHistory,
         dailyPlayedDate: storedData.dailyPlayedDate,
+        setupComplete: true,
       }
 
   // Sync user to D1 after Clerk loads.
@@ -165,7 +176,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     let local: StoredData = DEFAULT_STORED
     try {
       const raw = localStorage.getItem(key)
-      if (raw) local = { ...DEFAULT_STORED, ...JSON.parse(raw) }
+      if (raw) {
+        local = { ...DEFAULT_STORED, ...JSON.parse(raw) }
+      } else {
+        // New account — carry over guest session data if it exists
+        const guestRaw = localStorage.getItem('trvlplay_guest')
+        if (guestRaw) {
+          local = { ...DEFAULT_STORED, ...JSON.parse(guestRaw) }
+          localStorage.removeItem('trvlplay_guest')
+        }
+      }
     } catch { /* ignore */ }
 
     const initials = getInitials(clerkUser.fullName)
@@ -313,9 +333,47 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGuestModeState(true)
   }
 
+  function exitGuestMode() {
+    setGuestModeState(false)
+    setGuestGamePlayed(false)
+  }
+
+  async function completeSetup(username: string, avatarColor: string) {
+    const newData: StoredData = { ...storedData, customUsername: username, avatarColor, setupComplete: true }
+    saveData(newData)
+    // Persist username to D1
+    if (clerkUser) {
+      const initials = getInitials(clerkUser.fullName)
+      const friendCode = makeFriendCode(clerkUser.id, clerkUser.fullName)
+      syncUser({
+        id: clerkUser.id,
+        username,
+        initials,
+        avatarColor,
+        friendCode,
+      }).catch(console.error)
+    }
+  }
+
+  async function updateProfile(username: string, avatarColor: string) {
+    const newData: StoredData = { ...storedData, customUsername: username, avatarColor }
+    saveData(newData)
+    if (clerkUser) {
+      const initials = getInitials(clerkUser.fullName)
+      const friendCode = makeFriendCode(clerkUser.id, clerkUser.fullName)
+      syncUser({
+        id: clerkUser.id,
+        username,
+        initials,
+        avatarColor,
+        friendCode,
+      }).catch(console.error)
+    }
+  }
+
   return (
     <AppContext.Provider
-      value={{ user, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, setGuestMode, recordResult, buyItem, equipItem, signOut }}
+      value={{ user, userId: clerkUser?.id ?? null, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, setGuestMode, exitGuestMode, completeSetup, updateProfile, recordResult, buyItem, equipItem, signOut }}
     >
       {children}
     </AppContext.Provider>

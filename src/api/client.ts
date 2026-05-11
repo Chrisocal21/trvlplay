@@ -45,8 +45,14 @@ export async function getDailyPuzzle() {
   return apiFetch('/api/puzzles/daily')
 }
 
-export async function getFreePuzzle(excludeIds: number[] = []) {
-  const qs = excludeIds.length ? `?exclude=${excludeIds.join(',')}` : ''
+export async function getFreePuzzle(userId?: string | null, excludeIds: number[] = []) {
+  const params = new URLSearchParams()
+  if (userId) {
+    params.set('userId', userId)
+  } else if (excludeIds.length) {
+    params.set('exclude', excludeIds.join(','))
+  }
+  const qs = params.toString() ? `?${params.toString()}` : ''
   return apiFetch(`/api/puzzles/freeplay${qs}`)
 }
 

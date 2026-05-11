@@ -69,7 +69,8 @@ export default {
           VALUES (?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             username = excluded.username,
-            initials = excluded.initials
+            initials = excluded.initials,
+            avatar_color = excluded.avatar_color
         `).bind(id, username, initials, avatarColor, friendCode).run()
 
         await env.trvlplay_db.prepare(`
@@ -177,20 +178,50 @@ export default {
         return json({ puzzle: parsePuzzle(puzzle) }, 200, request)
       }
 
-      // GET /api/puzzles/freeplay?exclude=1,2,3
+      // GET /api/puzzles/freeplay?userId=xxx   (signed-in: dedup via game_results)
+      // GET /api/puzzles/freeplay?exclude=1,2,3 (guest: client-supplied exclude list)
       if (path === '/api/puzzles/freeplay' && request.method === 'GET') {
+        const userId = url.searchParams.get('userId')
         const exclude = url.searchParams.get('exclude') ?? ''
         const excludeIds = exclude.split(',').map(Number).filter(Boolean)
 
-        let query = 'SELECT * FROM puzzles'
-        const binds: unknown[] = []
-        if (excludeIds.length) {
-          query += ` WHERE id NOT IN (${excludeIds.map(() => '?').join(',')})`
-          binds.push(...excludeIds)
-        }
-        query += ' ORDER BY RANDOM() LIMIT 1'
+        let puzzle = null
 
-        const puzzle = await env.trvlplay_db.prepare(query).bind(...binds).first()
+        if (userId) {
+          // Exclude puzzles this user has already played (from game_results)
+          puzzle = await env.trvlplay_db.prepare(`
+            SELECT * FROM puzzles
+            WHERE id NOT IN (
+              SELECT puzzle_id FROM game_results WHERE user_id = ?
+            )
+            ORDER BY RANDOM() LIMIT 1
+          `).bind(userId).first()
+
+          // Pool exhausted — reset and serve any puzzle
+          if (!puzzle) {
+            puzzle = await env.trvlplay_db.prepare(
+              'SELECT * FROM puzzles ORDER BY RANDOM() LIMIT 1'
+            ).first()
+          }
+        } else {
+          // Guest path: use client-supplied exclude list
+          let query = 'SELECT * FROM puzzles'
+          const binds: unknown[] = []
+          if (excludeIds.length) {
+            query += ` WHERE id NOT IN (${excludeIds.map(() => '?').join(',')})`
+            binds.push(...excludeIds)
+          }
+          query += ' ORDER BY RANDOM() LIMIT 1'
+          puzzle = await env.trvlplay_db.prepare(query).bind(...binds).first()
+
+          // Pool exhausted for guest — reset
+          if (!puzzle) {
+            puzzle = await env.trvlplay_db.prepare(
+              'SELECT * FROM puzzles ORDER BY RANDOM() LIMIT 1'
+            ).first()
+          }
+        }
+
         if (!puzzle) return err('No puzzles available', 404, request)
         return json({ puzzle: parsePuzzle(puzzle) }, 200, request)
       }
