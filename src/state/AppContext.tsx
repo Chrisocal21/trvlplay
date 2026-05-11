@@ -134,36 +134,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
         stats: storedData.stats,
       }
 
-  // Sync user to D1 after Clerk loads — send local data so D1 can reconcile, then use D1 as source of truth
+  // Sync user to D1 after Clerk loads.
+  // IMPORTANT: reads localStorage directly — not from React state — because both effects
+  // fire simultaneously when clerkUser appears and the state may still be DEFAULT_STORED.
   useEffect(() => {
     if (!clerkUser) return
+    const key = `trvlplay_${clerkUser.id}`
+    let local: StoredData = DEFAULT_STORED
+    try {
+      const raw = localStorage.getItem(key)
+      if (raw) local = { ...DEFAULT_STORED, ...JSON.parse(raw) }
+    } catch { /* ignore */ }
+
     const initials = getInitials(clerkUser.fullName)
     const friendCode = makeFriendCode(clerkUser.id, clerkUser.fullName)
     syncUser({
       id: clerkUser.id,
       username: clerkUser.username ?? clerkUser.firstName ?? clerkUser.fullName ?? 'Player',
       initials,
-      avatarColor: storedData.avatarColor,
+      avatarColor: local.avatarColor,
       friendCode,
-      localCoins: storedData.coins,
-      localStats: storedData.stats,
+      localCoins: local.coins,
+      localStats: local.stats,
     }).then((res: { user?: { coins?: number; played?: number; wins?: number; streak?: number; perfect?: number } }) => {
       const remote = res?.user
       if (!remote) return
-      // D1 has reconciled local + remote — trust it completely and save back locally
+      // D1 has reconciled all devices — trust it completely and write back locally
       const synced: StoredData = {
-        ...storedData,
-        coins: remote.coins ?? storedData.coins,
+        ...local,
+        coins: remote.coins ?? local.coins,
         stats: {
-          played: remote.played ?? storedData.stats.played,
-          wins: remote.wins ?? storedData.stats.wins,
-          streak: remote.streak ?? storedData.stats.streak,
-          perfect: remote.perfect ?? storedData.stats.perfect,
+          played: remote.played ?? local.stats.played,
+          wins: remote.wins ?? local.stats.wins,
+          streak: remote.streak ?? local.stats.streak,
+          perfect: remote.perfect ?? local.stats.perfect,
         },
       }
-      if (storageKey) {
-        try { localStorage.setItem(storageKey, JSON.stringify(synced)) } catch { /* quota */ }
-      }
+      try { localStorage.setItem(key, JSON.stringify(synced)) } catch { /* quota */ }
       setStoredData(synced)
     }).catch(console.error)
   }, [clerkUser?.id])
