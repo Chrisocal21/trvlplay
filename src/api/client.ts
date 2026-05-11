@@ -33,6 +33,7 @@ export async function recordResult(data: {
   strikes: number
   durationSeconds: number
   coinsEarned: number
+  isMonthlySpecial?: boolean
 }) {
   return apiFetch('/api/results', {
     method: 'POST',
@@ -82,6 +83,11 @@ export async function equipItem(data: {
 
 export async function getFriends(userId: string) {
   return apiFetch(`/api/friends/${userId}`)
+}
+
+export async function getMedallions(userId: string): Promise<string[]> {
+  const data = await apiFetch(`/api/medallions/${userId}`)
+  return data.medallions as string[]
 }
 
 export async function sendFriendRequest(userId: string, friendCode: string) {

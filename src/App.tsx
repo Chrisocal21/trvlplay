@@ -5,6 +5,9 @@ import DailySortCard from './components/DailySortCard'
 import GameGrid from './components/GameGrid'
 import BottomNav from './components/BottomNav'
 import SortGame from './screens/SortGame'
+import ImpostorGame from './screens/ImpostorGame'
+import PairsGame from './screens/PairsGame'
+import BlitzGame from './screens/BlitzGame'
 import ProfileScreen from './screens/ProfileScreen'
 import FriendsScreen from './screens/FriendsScreen'
 import ShopScreen from './screens/ShopScreen'
@@ -16,7 +19,7 @@ import { cachePuzzle, cacheSize } from './api/puzzleCache'
 const CACHE_TARGET = 7
 
 type Tab = 'games' | 'friends' | 'shop' | 'profile'
-type Screen = 'home' | 'sort'
+type Screen = 'home' | 'sort' | 'impostor' | 'pairs' | 'blitz'
 
 function App() {
   const { guestMode, guestGamePlayed, exitGuestMode, userId } = useApp()
@@ -47,6 +50,9 @@ function App() {
     return () => clearTimeout(timer)
   }, [userId])
   const [sortMode, setSortMode] = useState<'daily' | 'freeplay'>('freeplay')
+  const [impostorMode, setImpostorMode] = useState<'daily' | 'freeplay'>('freeplay')
+  const [pairsMode, setPairsMode] = useState<'daily' | 'freeplay'>('freeplay')
+  const [blitzMode, setBlitzMode] = useState<'daily' | 'freeplay'>('freeplay')
 
   function launchSort(mode: 'daily' | 'freeplay') {
     // Guest who already played one game must sign up to play again
@@ -56,6 +62,33 @@ function App() {
     }
     setSortMode(mode)
     setScreen('sort')
+  }
+
+  function launchImpostor(mode: 'daily' | 'freeplay') {
+    if (guestMode && guestGamePlayed) {
+      exitGuestMode()
+      return
+    }
+    setImpostorMode(mode)
+    setScreen('impostor')
+  }
+
+  function launchPairs(mode: 'daily' | 'freeplay') {
+    if (guestMode && guestGamePlayed) {
+      exitGuestMode()
+      return
+    }
+    setPairsMode(mode)
+    setScreen('pairs')
+  }
+
+  function launchBlitz(mode: 'daily' | 'freeplay') {
+    if (guestMode && guestGamePlayed) {
+      exitGuestMode()
+      return
+    }
+    setBlitzMode(mode)
+    setScreen('blitz')
   }
 
   if (screen === 'sort') {
@@ -68,6 +101,36 @@ function App() {
     )
   }
 
+  if (screen === 'impostor') {
+    return (
+      <ImpostorGame
+        onBack={() => setScreen('home')}
+        onSignUp={exitGuestMode}
+        mode={impostorMode}
+      />
+    )
+  }
+
+  if (screen === 'pairs') {
+    return (
+      <PairsGame
+        onBack={() => setScreen('home')}
+        onSignUp={exitGuestMode}
+        mode={pairsMode}
+      />
+    )
+  }
+
+  if (screen === 'blitz') {
+    return (
+      <BlitzGame
+        onBack={() => setScreen('home')}
+        onSignUp={exitGuestMode}
+        mode={blitzMode}
+      />
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#E1F5EE] pb-20">
       <OfflineBanner />
@@ -76,7 +139,12 @@ function App() {
         {activeTab === 'games' && (
           <>
             <DailySortCard onPlay={() => launchSort('daily')} />
-            <GameGrid onPlaySort={() => launchSort('freeplay')} />
+            <GameGrid
+              onPlaySort={() => launchSort('freeplay')}
+              onPlayImpostor={() => launchImpostor('freeplay')}
+              onPlayPairs={() => launchPairs('freeplay')}
+              onPlayBlitz={() => launchBlitz('freeplay')}
+            />
           </>
         )}
         {activeTab === 'profile' && <ProfileScreen onGoToFriends={() => setActiveTab('friends')} />}

@@ -26,7 +26,7 @@ interface Props {
 }
 
 export default function ProfileScreen({ onGoToFriends }: Props) {
-  const { user, isSignedIn, signOut, updateProfile } = useApp()
+  const { user, isSignedIn, signOut, updateProfile, medallions } = useApp()
   const [copied, setCopied] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editUsername, setEditUsername] = useState(user.username)
@@ -204,6 +204,38 @@ export default function ProfileScreen({ onGoToFriends }: Props) {
             <StatCard label="Perfect games" value={user.stats.perfect} />
           </div>
         </div>
+
+        {/* Medallions */}
+        {isSignedIn && (() => {
+          const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+          const year = new Date().getFullYear()
+          return (
+            <div className="bg-[#5DCAA5] rounded-2xl overflow-hidden flex shadow-sm">
+              <div className="w-1.5 bg-[#EF9F27] shrink-0" />
+              <div className="flex-1 px-4 py-4">
+                <p className="text-[#085041] text-[10px] font-black uppercase tracking-[0.14em] mb-3">Monthly Medallions</p>
+                <div className="flex gap-2 flex-wrap">
+                  {MONTHS.map((m, i) => {
+                    const key = `${year}-${String(i + 1).padStart(2, '0')}`
+                    const earned = medallions.includes(key)
+                    return (
+                      <div
+                        key={m}
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          earned ? 'bg-[#EF9F27]' : 'bg-[#9FE1CB] opacity-40'
+                        }`}
+                      >
+                        <span className={`text-[9px] font-black ${
+                          earned ? 'text-[#085041]' : 'text-[#0F6E56]'
+                        }`}>{m}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Friends nudge */}
         {isSignedIn && (

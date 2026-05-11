@@ -29,25 +29,59 @@ function GameCard({ name, tagline, accentColor, available, onPlay }: GameCardPro
   )
 }
 
-export default function GameGrid({ onPlaySort }: { onPlaySort: () => void }) {
+export default function GameGrid({
+  onPlaySort,
+  onPlayImpostor,
+  onPlayPairs,
+  onPlayBlitz,
+}: {
+  onPlaySort: () => void
+  onPlayImpostor: () => void
+  onPlayPairs: () => void
+  onPlayBlitz: () => void
+}) {
   const games = [
     {
       name: 'Sort',
       tagline: 'Group 16 items into 4 categories',
       accentColor: '#085041',
       available: true,
+      onPlay: onPlaySort,
+    },
+    {
+      name: 'Impostor',
+      tagline: 'Spot the item that does not belong',
+      accentColor: '#E24B4A',
+      available: true,
+      onPlay: onPlayImpostor,
+    },
+    {
+      name: 'Pairs',
+      tagline: 'Flip and match items from the same category',
+      accentColor: '#9D5FD0',
+      available: true,
+      onPlay: onPlayPairs,
+    },
+    {
+      name: 'Blitz',
+      tagline: 'Sort as many items as you can in 30 seconds',
+      accentColor: '#EF9F27',
+      available: true,
+      onPlay: onPlayBlitz,
     },
     {
       name: 'Word Hunt',
       tagline: 'Guess the hidden word',
       accentColor: '#185FA5',
       available: false,
+      onPlay: undefined,
     },
     {
       name: 'Grid Lock',
       tagline: 'Fill the grid without conflict',
       accentColor: '#9FE1CB',
       available: false,
+      onPlay: undefined,
     },
   ]
 
@@ -56,7 +90,7 @@ export default function GameGrid({ onPlaySort }: { onPlaySort: () => void }) {
       <h2 className="text-[#085041] font-black text-lg mb-3 uppercase tracking-wide">Games</h2>
       <div className="flex flex-col gap-3">
         {games.map((game) => (
-          <GameCard key={game.name} {...game} onPlay={game.available ? onPlaySort : undefined} />
+          <GameCard key={game.name} {...game} onPlay={game.available ? game.onPlay : undefined} />
         ))}
       </div>
     </section>

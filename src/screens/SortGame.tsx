@@ -64,13 +64,14 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
   const [shaking, setShaking] = useState(false)
   const [result, setResult] = useState<GameResult | null>(null)
   const [guestSeenIds, setGuestSeenIds] = useState<number[]>([])
+  const [isMonthlySpecial, setIsMonthlySpecial] = useState(false)
   const startTime = useRef(Date.now())
 
   // Fetch puzzle from API on mount
   useEffect(() => {
     const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId)
     fetch
-      .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[] } }) => {
+      .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[]; isMonthlySpecial?: boolean } }) => {
         const groups: Group[] = res.puzzle.groups.map((g, i) => ({
           label: g.label,
           color: GROUP_COLORS[i],
@@ -79,6 +80,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
         setPuzzleId(res.puzzle.id)
         setPuzzle(groups)
         setTiles(buildTiles(groups))
+        if (res.puzzle.isMonthlySpecial) setIsMonthlySpecial(true)
         if (!userId && mode === 'freeplay') setGuestSeenIds(prev => [...prev, res.puzzle.id])
         // Cache free-play puzzles for offline use
         if (mode === 'freeplay') cachePuzzle({ id: res.puzzle.id, groups: res.puzzle.groups })
@@ -123,7 +125,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
 
   function endGame(won: boolean, finalStrikes: number) {
     const duration = Math.round((Date.now() - startTime.current) / 1000)
-    setResult({ won, strikes: finalStrikes, durationSeconds: duration, streak: user.stats.streak, puzzleId, mode })
+    setResult({ won, strikes: finalStrikes, durationSeconds: duration, streak: user.stats.streak, isMonthlySpecial, puzzleId, mode })
   }
 
   function handleSubmit() {
@@ -303,6 +305,22 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
               </div>
             </div>
 
+            {/* Monthly special badge */}
+            {result.won && isMonthlySpecial && (
+              <div className="rounded-2xl bg-[#085041] overflow-hidden flex shadow-sm">
+                <div className="w-1.5 bg-[#EF9F27] shrink-0" />
+                <div className="flex-1 px-4 py-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[#EF9F27] font-black text-sm">Monthly Special</p>
+                    <p className="text-[#5DCAA5] text-xs mt-0.5">Medallion earned</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#EF9F27] flex items-center justify-center">
+                    <span className="text-[#085041] font-black text-base">{new Date().toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Streak */}
             {result.won && user.stats.streak > 0 && (
               <div className="rounded-2xl bg-[#5DCAA5] overflow-hidden flex shadow-sm">
@@ -316,7 +334,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
 
             {/* Coin breakdown */}
             {result.won && (() => {
-              const base = 100
+              const base = isMonthlySpecial ? 300 : 100
               const penalty = result.strikes * 20
               const perfectBonus = result.strikes === 0 ? 50 : 0
               const speedBonus = result.durationSeconds < 60
@@ -332,7 +350,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
                   <div className="flex-1 px-4 py-4 flex flex-col gap-2">
                     <p className="text-[#085041] text-[10px] font-black uppercase tracking-[0.14em] mb-1">Coins Earned</p>
                     <div className="flex justify-between text-sm">
-                      <span className="text-[#0F6E56] font-semibold">Base reward</span>
+                      <span className="text-[#0F6E56] font-semibold">{isMonthlySpecial ? 'Monthly special (3x)' : 'Base reward'}</span>
                       <span className="text-[#085041] font-black">+{base}</span>
                     </div>
                     {penalty > 0 && (

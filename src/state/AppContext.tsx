@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useUser, useAuth, useClerk } from '@clerk/clerk-react'
-import { syncUser, recordResult as apiRecordResult, getInventory, buyItem as apiBuyItem, equipItem as apiEquipItem } from '../api/client'
+import { syncUser, recordResult as apiRecordResult, getInventory, buyItem as apiBuyItem, equipItem as apiEquipItem, getMedallions } from '../api/client'
 
 export interface UserStats {
   played: number
@@ -29,6 +29,7 @@ export interface GameResult {
   streak: number          // streak at the time the game ended (before this result updates it)
   puzzleId?: number
   mode?: 'daily' | 'freeplay'
+  isMonthlySpecial?: boolean
 }
 
 interface StoredData {
@@ -49,6 +50,7 @@ interface AppState {
   guestMode: boolean
   guestGamePlayed: boolean
   inventory: InventoryItem[]
+  medallions: string[]          // 'YYYY-MM' strings for earned monthly specials
   setGuestMode: () => void
   exitGuestMode: () => void
   completeSetup: (username: string, avatarColor: string) => Promise<void>
@@ -83,7 +85,8 @@ const PERFECT_BONUS = 50
 
 export function calcCoins(result: GameResult): number {
   if (!result.won) return 0
-  let coins = BASE_COINS
+  const base = result.isMonthlySpecial ? BASE_COINS * 3 : BASE_COINS
+  let coins = base
   coins -= result.strikes * STRIKE_PENALTY
   if (result.strikes === 0) coins += PERFECT_BONUS
   if (result.durationSeconds < 60) {
@@ -123,6 +126,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [guestMode, setGuestModeState] = useState(false)
   const [guestGamePlayed, setGuestGamePlayed] = useState(false)
   const [inventory, setInventory] = useState<InventoryItem[]>([])
+  const [medallions, setMedallions] = useState<string[]>([])
 
   const userId = clerkUser?.id ?? (guestMode ? 'guest' : null)
   const storageKey = userId ? `trvlplay_${userId}` : null
@@ -245,6 +249,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
           { item_type: 'card_back', item_id: 'teal', equipped: 1 },
         ])
       })
+
+    // Load medallions
+    getMedallions(clerkUser.id)
+      .then(list => setMedallions(list))
+      .catch(() => { /* non-critical, silently ignore */ })
   }, [clerkUser?.id])
 
   function recordResult(result: GameResult) {
@@ -295,6 +304,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         strikes: result.strikes,
         durationSeconds: result.durationSeconds,
         coinsEarned: earned,
+        isMonthlySpecial: result.isMonthlySpecial,
+      }).then((res: { medallionEarned?: string | null }) => {
+        if (res?.medallionEarned) {
+          setMedallions(prev => prev.includes(res.medallionEarned!) ? prev : [...prev, res.medallionEarned!])
+        }
       }).catch(console.error)
     }
   }
@@ -380,7 +394,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider
-      value={{ user, userId: clerkUser?.id ?? null, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, setGuestMode, exitGuestMode, completeSetup, updateProfile, recordResult, buyItem, equipItem, signOut }}
+      value={{ user, userId: clerkUser?.id ?? null, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, medallions, setGuestMode, exitGuestMode, completeSetup, updateProfile, recordResult, buyItem, equipItem, signOut }}
     >
       {children}
     </AppContext.Provider>

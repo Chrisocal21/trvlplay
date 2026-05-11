@@ -119,9 +119,10 @@ export default {
       if (path === '/api/results' && request.method === 'POST') {
         const body = await request.json() as {
           userId: string; puzzleId: number; mode: string;
-          won: boolean; strikes: number; durationSeconds: number; coinsEarned: number
+          won: boolean; strikes: number; durationSeconds: number; coinsEarned: number;
+          isMonthlySpecial?: boolean
         }
-        const { userId, puzzleId, mode, won, strikes, durationSeconds, coinsEarned } = body
+        const { userId, puzzleId, mode, won, strikes, durationSeconds, coinsEarned, isMonthlySpecial } = body
         if (!userId || !puzzleId || !mode) return err('Missing required fields', 400, request)
 
         await env.trvlplay_db.prepare(`
@@ -166,7 +167,17 @@ export default {
           'SELECT coins FROM users WHERE id = ?'
         ).bind(userId).first<{ coins: number }>())?.coins ?? 0
 
-        return json({ ok: true, coins }, 200, request)
+        // Award medallion if this was a monthly special win
+        let medallionEarned: string | null = null
+        if (won && isMonthlySpecial) {
+          const month = new Date().toISOString().slice(0, 7)  // 'YYYY-MM'
+          await env.trvlplay_db.prepare(
+            'INSERT OR IGNORE INTO user_medallions (user_id, month) VALUES (?, ?)'
+          ).bind(userId, month).run()
+          medallionEarned = month
+        }
+
+        return json({ ok: true, coins, medallionEarned }, 200, request)
       }
 
       // GET /api/puzzles/daily
@@ -175,7 +186,9 @@ export default {
           "SELECT * FROM puzzles WHERE daily_date = date('now') LIMIT 1"
         ).first()
         if (!puzzle) return err('No daily puzzle today', 404, request)
-        return json({ puzzle: parsePuzzle(puzzle) }, 200, request)
+        const todayStr = new Date().toISOString().slice(0, 10)  // 'YYYY-MM-DD'
+        const isMonthlySpecial = todayStr.slice(8, 10) === '01'
+        return json({ puzzle: { ...parsePuzzle(puzzle), isMonthlySpecial } }, 200, request)
       }
 
       // GET /api/puzzles/freeplay?userId=xxx   (signed-in: dedup via game_results)
@@ -382,6 +395,16 @@ export default {
         `).bind(userId, userId, userId, userId).all()
 
         return json({ friends: friendsResult.results, pending: pendingResult.results }, 200, request)
+      }
+
+      // GET /api/medallions/:userId
+      if (path.startsWith('/api/medallions/') && request.method === 'GET') {
+        const userId = path.split('/')[3]
+        if (!userId) return err('Missing userId', 400, request)
+        const result = await env.trvlplay_db.prepare(
+          'SELECT month FROM user_medallions WHERE user_id = ? ORDER BY month ASC'
+        ).bind(userId).all<{ month: string }>()
+        return json({ medallions: result.results.map(r => r.month) }, 200, request)
       }
 
       return err('Not found', 404, request)
