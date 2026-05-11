@@ -51,13 +51,15 @@ export default {
         return json({ ok: true }, 200, request)
       }
 
-      // POST /api/users/sync — upsert user after Clerk auth
+      // POST /api/users/sync — upsert user after Clerk auth, reconcile local data
       if (path === '/api/users/sync' && request.method === 'POST') {
         const body = await request.json() as {
           id: string; username: string; initials: string;
-          avatarColor?: string; friendCode: string
+          avatarColor?: string; friendCode: string;
+          localCoins?: number;
+          localStats?: { played: number; wins: number; streak: number; perfect: number }
         }
-        const { id, username, initials, avatarColor = '#5DCAA5', friendCode } = body
+        const { id, username, initials, avatarColor = '#5DCAA5', friendCode, localCoins, localStats } = body
         if (!id || !username || !initials || !friendCode) {
           return err('Missing required fields', 400, request)
         }
@@ -73,6 +75,24 @@ export default {
         await env.trvlplay_db.prepare(`
           INSERT OR IGNORE INTO user_stats (user_id) VALUES (?)
         `).bind(id).run()
+
+        // Reconcile: if local device had data, merge into D1 taking the higher value
+        if (typeof localCoins === 'number' && localCoins > 0) {
+          await env.trvlplay_db.prepare(
+            'UPDATE users SET coins = MAX(coins, ?) WHERE id = ?'
+          ).bind(localCoins, id).run()
+        }
+
+        if (localStats) {
+          await env.trvlplay_db.prepare(`
+            UPDATE user_stats SET
+              played = MAX(played, ?),
+              wins   = MAX(wins, ?),
+              streak = MAX(streak, ?),
+              perfect = MAX(perfect, ?)
+            WHERE user_id = ?
+          `).bind(localStats.played, localStats.wins, localStats.streak, localStats.perfect, id).run()
+        }
 
         const user = await env.trvlplay_db.prepare(
           'SELECT u.*, s.played, s.wins, s.streak, s.perfect FROM users u LEFT JOIN user_stats s ON u.id = s.user_id WHERE u.id = ?'

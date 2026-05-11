@@ -15,6 +15,8 @@ export async function syncUser(data: {
   initials: string
   avatarColor: string
   friendCode: string
+  localCoins?: number
+  localStats?: { played: number; wins: number; streak: number; perfect: number }
 }) {
   return apiFetch('/api/users/sync', {
     method: 'POST',
