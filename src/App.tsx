@@ -7,6 +7,7 @@ import BottomNav from './components/BottomNav'
 import SortGame from './screens/SortGame'
 import ProfileScreen from './screens/ProfileScreen'
 import FriendsScreen from './screens/FriendsScreen'
+import ShopScreen from './screens/ShopScreen'
 import OfflineBanner from './components/OfflineBanner'
 
 type Tab = 'games' | 'friends' | 'shop' | 'profile'
@@ -15,9 +16,10 @@ type Screen = 'home' | 'sort'
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('games')
   const [screen, setScreen] = useState<Screen>('home')
+  const [sortMode, setSortMode] = useState<'daily' | 'freeplay'>('freeplay')
 
   if (screen === 'sort') {
-    return <SortGame onBack={() => setScreen('home')} />
+    return <SortGame onBack={() => setScreen('home')} mode={sortMode} />
   }
 
   return (
@@ -27,15 +29,13 @@ function App() {
       <main>
         {activeTab === 'games' && (
           <>
-            <DailySortCard onPlay={() => setScreen('sort')} />
-            <GameGrid onPlaySort={() => setScreen('sort')} />
+            <DailySortCard onPlay={() => { setSortMode('daily'); setScreen('sort') }} />
+            <GameGrid onPlaySort={() => { setSortMode('freeplay'); setScreen('sort') }} />
           </>
         )}
         {activeTab === 'profile' && <ProfileScreen />}
         {activeTab === 'friends' && <FriendsScreen />}
-        {activeTab === 'shop' && (
-          <div className="px-4 pt-8 text-center text-[#085041] font-black text-lg">Shop coming soon</div>
-        )}
+        {activeTab === 'shop' && <ShopScreen />}
       </main>
       <BottomNav active={activeTab} onSelect={setActiveTab} />
     </div>

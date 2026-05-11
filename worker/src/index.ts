@@ -128,12 +128,18 @@ export default {
           VALUES (?, ?, ?, ?, ?, ?, ?)
         `).bind(userId, puzzleId, mode, won ? 1 : 0, strikes, durationSeconds, coinsEarned).run()
 
-        // Update stats
+        // Update stats — streak only increments on a win where last_played_date was yesterday
+        // (first win of the day) or streak resets to 1 if the chain was broken
         await env.trvlplay_db.prepare(`
           UPDATE user_stats SET
             played = played + 1,
             wins = wins + ?,
-            streak = CASE WHEN ? = 1 THEN streak + 1 ELSE 0 END,
+            streak = CASE
+              WHEN ? = 0 THEN streak                          -- loss: keep streak unchanged
+              WHEN last_played_date = date('now') THEN streak  -- already played today: no change
+              WHEN last_played_date = date('now', '-1 day') THEN streak + 1  -- played yesterday: extend
+              ELSE 1                                           -- gap: reset to 1
+            END,
             perfect = perfect + ?,
             last_played_date = date('now')
           WHERE user_id = ?
@@ -187,6 +193,164 @@ export default {
         const puzzle = await env.trvlplay_db.prepare(query).bind(...binds).first()
         if (!puzzle) return err('No puzzles available', 404, request)
         return json({ puzzle: parsePuzzle(puzzle) }, 200, request)
+      }
+
+      // GET /api/inventory/:userId
+      if (path.startsWith('/api/inventory/') && request.method === 'GET') {
+        const userId = path.split('/')[3]
+        if (!userId) return err('Missing user id', 400, request)
+
+        const items = await env.trvlplay_db.prepare(
+          'SELECT item_type, item_id, equipped FROM user_inventory WHERE user_id = ?'
+        ).bind(userId).all()
+
+        return json({ inventory: items.results }, 200, request)
+      }
+
+      // POST /api/shop/buy — deduct coins, add to inventory
+      if (path === '/api/shop/buy' && request.method === 'POST') {
+        const body = await request.json() as {
+          userId: string; itemType: string; itemId: string; price: number
+        }
+        const { userId, itemType, itemId, price } = body
+        if (!userId || !itemType || !itemId || price == null) {
+          return err('Missing required fields', 400, request)
+        }
+
+        // Check if already owned
+        const existing = await env.trvlplay_db.prepare(
+          'SELECT id FROM user_inventory WHERE user_id = ? AND item_type = ? AND item_id = ?'
+        ).bind(userId, itemType, itemId).first()
+        if (existing) return err('Already owned', 409, request)
+
+        // Check balance
+        const userRow = await env.trvlplay_db.prepare(
+          'SELECT coins FROM users WHERE id = ?'
+        ).bind(userId).first<{ coins: number }>()
+        if (!userRow) return err('User not found', 404, request)
+        if (userRow.coins < price) return err('Insufficient coins', 402, request)
+
+        // Deduct coins + add to inventory
+        await env.trvlplay_db.prepare(
+          'UPDATE users SET coins = coins - ? WHERE id = ?'
+        ).bind(price, userId).run()
+
+        await env.trvlplay_db.prepare(
+          'INSERT INTO user_inventory (user_id, item_type, item_id) VALUES (?, ?, ?)'
+        ).bind(userId, itemType, itemId).run()
+
+        await env.trvlplay_db.prepare(
+          'INSERT INTO coin_transactions (user_id, amount, reason) VALUES (?, ?, ?)'
+        ).bind(userId, -price, `shop_${itemType}_${itemId}`).run()
+
+        const newCoins = (await env.trvlplay_db.prepare(
+          'SELECT coins FROM users WHERE id = ?'
+        ).bind(userId).first<{ coins: number }>())?.coins ?? 0
+
+        return json({ ok: true, coins: newCoins }, 200, request)
+      }
+
+      // POST /api/shop/equip — set equipped item for a type
+      if (path === '/api/shop/equip' && request.method === 'POST') {
+        const body = await request.json() as {
+          userId: string; itemType: string; itemId: string
+        }
+        const { userId, itemType, itemId } = body
+        if (!userId || !itemType || !itemId) return err('Missing required fields', 400, request)
+
+        // Verify owned
+        const owned = await env.trvlplay_db.prepare(
+          'SELECT id FROM user_inventory WHERE user_id = ? AND item_type = ? AND item_id = ?'
+        ).bind(userId, itemType, itemId).first()
+        if (!owned) return err('Item not owned', 403, request)
+
+        // Unequip all of this type, then equip the selected one
+        await env.trvlplay_db.prepare(
+          'UPDATE user_inventory SET equipped = 0 WHERE user_id = ? AND item_type = ?'
+        ).bind(userId, itemType).run()
+
+        await env.trvlplay_db.prepare(
+          'UPDATE user_inventory SET equipped = 1 WHERE user_id = ? AND item_type = ? AND item_id = ?'
+        ).bind(userId, itemType, itemId).run()
+
+        return json({ ok: true }, 200, request)
+      }
+
+      // POST /api/friends/request — send a friend request by friend code
+      if (path === '/api/friends/request' && request.method === 'POST') {
+        const body = await request.json() as { userId: string; friendCode: string }
+        const { userId, friendCode } = body
+        if (!userId || !friendCode) return err('Missing required fields', 400, request)
+
+        const target = await env.trvlplay_db.prepare(
+          'SELECT id FROM users WHERE friend_code = ?'
+        ).bind(friendCode).first<{ id: string }>()
+        if (!target) return err('Friend code not found', 404, request)
+        if (target.id === userId) return err('Cannot add yourself', 400, request)
+
+        // Check for existing relationship
+        const existing = await env.trvlplay_db.prepare(
+          'SELECT id, status FROM friends WHERE (requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?)'
+        ).bind(userId, target.id, target.id, userId).first<{ status: string }>()
+        if (existing) {
+          return json({ ok: true, status: existing.status }, 200, request)
+        }
+
+        await env.trvlplay_db.prepare(
+          'INSERT INTO friends (requester_id, addressee_id, status) VALUES (?, ?, ?)'
+        ).bind(userId, target.id, 'pending').run()
+
+        return json({ ok: true, status: 'pending' }, 200, request)
+      }
+
+      // POST /api/friends/respond — accept or decline a request
+      if (path === '/api/friends/respond' && request.method === 'POST') {
+        const body = await request.json() as { userId: string; requesterId: string; action: 'accept' | 'decline' }
+        const { userId, requesterId, action } = body
+        if (!userId || !requesterId || !action) return err('Missing required fields', 400, request)
+
+        if (action === 'accept') {
+          await env.trvlplay_db.prepare(
+            "UPDATE friends SET status = 'accepted' WHERE requester_id = ? AND addressee_id = ?"
+          ).bind(requesterId, userId).run()
+        } else {
+          await env.trvlplay_db.prepare(
+            'DELETE FROM friends WHERE requester_id = ? AND addressee_id = ?'
+          ).bind(requesterId, userId).run()
+        }
+
+        return json({ ok: true }, 200, request)
+      }
+
+      // GET /api/friends/:userId — list accepted friends + pending requests
+      if (path.startsWith('/api/friends/') && request.method === 'GET') {
+        const userId = path.split('/')[3]
+        if (!userId) return err('Missing user id', 400, request)
+
+        // Accepted friends (both directions)
+        const friendsResult = await env.trvlplay_db.prepare(`
+          SELECT
+            u.id, u.username, u.initials, u.avatar_color,
+            COALESCE(s.streak, 0) AS streak,
+            s.last_played_date
+          FROM friends f
+          JOIN users u ON u.id = CASE WHEN f.requester_id = ? THEN f.addressee_id ELSE f.requester_id END
+          LEFT JOIN user_stats s ON s.user_id = u.id
+          WHERE (f.requester_id = ? OR f.addressee_id = ?) AND f.status = 'accepted'
+        `).bind(userId, userId, userId).all()
+
+        // Pending requests (incoming: I am addressee; outgoing: I am requester)
+        const pendingResult = await env.trvlplay_db.prepare(`
+          SELECT
+            f.id AS request_id,
+            u.id, u.username, u.initials, u.avatar_color, u.friend_code,
+            CASE WHEN f.requester_id = ? THEN 'outgoing' ELSE 'incoming' END AS direction
+          FROM friends f
+          JOIN users u ON u.id = CASE WHEN f.requester_id = ? THEN f.addressee_id ELSE f.requester_id END
+          WHERE (f.requester_id = ? OR f.addressee_id = ?) AND f.status = 'pending'
+        `).bind(userId, userId, userId, userId).all()
+
+        return json({ friends: friendsResult.results, pending: pendingResult.results }, 200, request)
       }
 
       return err('Not found', 404, request)

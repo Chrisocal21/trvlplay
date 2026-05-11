@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useApp } from '../state/AppContext'
 import type { GameResult } from '../state/AppContext'
+import { getDailyPuzzle, getFreePuzzle } from '../api/client'
 
 interface Tile {
   id: number
@@ -14,11 +15,14 @@ interface Group {
   tiles: string[]
 }
 
-const PUZZLE: Group[] = [
+const GROUP_COLORS = ['#9FE1CB', '#5DCAA5', '#185FA5', '#EF9F27']
+
+// Fallback puzzle used only when API is unavailable
+const FALLBACK_PUZZLE: Group[] = [
   { label: 'Animals in a zoo', color: '#9FE1CB', tiles: ['LION', 'TIGER', 'GIRAFFE', 'PENGUIN'] },
-  { label: 'Types of pasta', color: '#5DCAA5', tiles: ['PENNE', 'RIGATONI', 'FUSILLI', 'LINGUINE'] },
-  { label: 'Card games', color: '#185FA5', tiles: ['POKER', 'RUMMY', 'SNAP', 'SOLITAIRE'] },
-  { label: 'Weather events', color: '#EF9F27', tiles: ['HAIL', 'SLEET', 'DRIZZLE', 'THUNDER'] },
+  { label: 'Types of pasta',   color: '#5DCAA5', tiles: ['PENNE', 'RIGATONI', 'FUSILLI', 'LINGUINE'] },
+  { label: 'Card games',       color: '#185FA5', tiles: ['POKER', 'RUMMY', 'SNAP', 'SOLITAIRE'] },
+  { label: 'Weather events',   color: '#EF9F27', tiles: ['HAIL', 'SLEET', 'DRIZZLE', 'THUNDER'] },
 ]
 
 function shuffle<T>(arr: T[]): T[] {
@@ -43,17 +47,43 @@ const MAX_STRIKES = 3
 
 interface Props {
   onBack: () => void
+  mode?: 'daily' | 'freeplay'
 }
 
-export default function SortGame({ onBack }: Props) {
+export default function SortGame({ onBack, mode = 'freeplay' }: Props) {
   const { recordResult } = useApp()
-  const [tiles, setTiles] = useState<Tile[]>(() => buildTiles(PUZZLE))
+  const [puzzle, setPuzzle] = useState<Group[] | null>(null)
+  const [puzzleId, setPuzzleId] = useState<number>(0)
+  const [loading, setLoading] = useState(true)
+  const [tiles, setTiles] = useState<Tile[]>([])
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [solvedGroups, setSolvedGroups] = useState<Group[]>([])
   const [strikes, setStrikes] = useState(0)
   const [shaking, setShaking] = useState(false)
   const [result, setResult] = useState<GameResult | null>(null)
   const startTime = useRef(Date.now())
+
+  // Fetch puzzle from API on mount
+  useEffect(() => {
+    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle()
+    fetch
+      .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[] } }) => {
+        const groups: Group[] = res.puzzle.groups.map((g, i) => ({
+          label: g.label,
+          color: GROUP_COLORS[i],
+          tiles: g.items,
+        }))
+        setPuzzleId(res.puzzle.id)
+        setPuzzle(groups)
+        setTiles(buildTiles(groups))
+      })
+      .catch(() => {
+        // API unavailable — use fallback
+        setPuzzle(FALLBACK_PUZZLE)
+        setTiles(buildTiles(FALLBACK_PUZZLE))
+      })
+      .finally(() => setLoading(false))
+  }, [mode])
 
   // When game ends, record into global state
   useEffect(() => {
@@ -75,7 +105,7 @@ export default function SortGame({ onBack }: Props) {
 
   function endGame(won: boolean, finalStrikes: number) {
     const duration = Math.round((Date.now() - startTime.current) / 1000)
-    setResult({ won, strikes: finalStrikes, durationSeconds: duration })
+    setResult({ won, strikes: finalStrikes, durationSeconds: duration, puzzleId, mode })
   }
 
   function handleSubmit() {
@@ -86,12 +116,12 @@ export default function SortGame({ onBack }: Props) {
     const isCorrect = selectedTiles.every(t => t.group === groupLabel)
 
     if (isCorrect) {
-      const solvedGroup = PUZZLE.find(g => g.label === groupLabel)!
+      const solvedGroup = puzzle!.find(g => g.label === groupLabel)!
       const newSolved = [...solvedGroups, solvedGroup]
       setSolvedGroups(newSolved)
       setTiles(prev => prev.filter(t => !selected.has(t.id)))
       setSelected(new Set())
-      if (newSolved.length === PUZZLE.length) endGame(true, strikes)
+      if (newSolved.length === puzzle!.length) endGame(true, strikes)
     } else {
       const newStrikes = strikes + 1
       setShaking(true)
@@ -108,6 +138,27 @@ export default function SortGame({ onBack }: Props) {
     setTiles(prev => shuffle(prev))
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#E1F5EE] flex flex-col">
+        <div className="bg-[#085041] px-5 py-5 flex items-center gap-4">
+          <button onClick={onBack} className="text-[#5DCAA5] -ml-1 p-1">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <h1 className="text-[#E1F5EE] text-lg font-black tracking-tight">Sort</h1>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-4 border-[#9FE1CB] border-t-[#085041] animate-spin" />
+            <p className="text-[#085041] font-bold text-sm">Loading puzzle...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#E1F5EE] flex flex-col">
 
@@ -119,6 +170,9 @@ export default function SortGame({ onBack }: Props) {
           </svg>
         </button>
         <h1 className="text-[#E1F5EE] text-lg font-black tracking-tight">Sort</h1>
+        {mode === 'daily' && (
+          <span className="ml-auto text-[#9FE1CB] text-xs font-black uppercase tracking-widest">Daily</span>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col px-4 pt-5 pb-6 gap-4">

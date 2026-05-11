@@ -49,3 +49,51 @@ export async function getFreePuzzle(excludeIds: number[] = []) {
   const qs = excludeIds.length ? `?exclude=${excludeIds.join(',')}` : ''
   return apiFetch(`/api/puzzles/freeplay${qs}`)
 }
+
+export async function getInventory(userId: string) {
+  return apiFetch(`/api/inventory/${userId}`)
+}
+
+export async function buyItem(data: {
+  userId: string; itemType: string; itemId: string; price: number
+}) {
+  return apiFetch('/api/shop/buy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+}
+
+export async function equipItem(data: {
+  userId: string; itemType: string; itemId: string
+}) {
+  return apiFetch('/api/shop/equip', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+}
+
+export async function getFriends(userId: string) {
+  return apiFetch(`/api/friends/${userId}`)
+}
+
+export async function sendFriendRequest(userId: string, friendCode: string) {
+  return apiFetch('/api/friends/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, friendCode }),
+  })
+}
+
+export async function respondFriendRequest(
+  userId: string,
+  requesterId: string,
+  action: 'accept' | 'decline'
+) {
+  return apiFetch('/api/friends/respond', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, requesterId, action }),
+  })
+}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useUser, useAuth, useClerk } from '@clerk/clerk-react'
-import { syncUser, recordResult as apiRecordResult } from '../api/client'
+import { syncUser, recordResult as apiRecordResult, getInventory, buyItem as apiBuyItem, equipItem as apiEquipItem } from '../api/client'
 
 export interface UserStats {
   played: number
@@ -17,18 +17,24 @@ export interface AppUser {
   friendCode: string
   coins: number
   stats: UserStats
+  playHistory: string[]
+  dailyPlayedDate: string
 }
 
 export interface GameResult {
   won: boolean
   strikes: number
   durationSeconds: number
+  puzzleId?: number
+  mode?: 'daily' | 'freeplay'
 }
 
 interface StoredData {
   coins: number
   stats: UserStats
   avatarColor: string
+  playHistory: string[]  // ISO date strings 'YYYY-MM-DD' of days played
+  dailyPlayedDate: string  // last date a daily Sort was completed, 'YYYY-MM-DD' or ''
 }
 
 interface AppState {
@@ -37,15 +43,26 @@ interface AppState {
   isSignedIn: boolean
   guestMode: boolean
   guestGamePlayed: boolean
+  inventory: InventoryItem[]
   setGuestMode: () => void
   recordResult: (result: GameResult) => void
+  buyItem: (itemType: string, itemId: string, price: number) => Promise<void>
+  equipItem: (itemType: string, itemId: string) => Promise<void>
   signOut: () => void
+}
+
+export interface InventoryItem {
+  item_type: string
+  item_id: string
+  equipped: number
 }
 
 const DEFAULT_STORED: StoredData = {
   coins: 0,
   stats: { played: 0, wins: 0, streak: 0, perfect: 0 },
   avatarColor: '#5DCAA5',
+  playHistory: [],
+  dailyPlayedDate: '',
 }
 
 const BASE_COINS = 100
@@ -89,6 +106,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const { signOut: clerkSignOut } = useClerk()
   const [guestMode, setGuestModeState] = useState(false)
   const [guestGamePlayed, setGuestGamePlayed] = useState(false)
+  const [inventory, setInventory] = useState<InventoryItem[]>([])
 
   const userId = clerkUser?.id ?? (guestMode ? 'guest' : null)
   const storageKey = userId ? `trvlplay_${userId}` : null
@@ -123,6 +141,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         friendCode: makeFriendCode(clerkUser.id, clerkUser.fullName),
         coins: storedData.coins,
         stats: storedData.stats,
+        playHistory: storedData.playHistory,
+        dailyPlayedDate: storedData.dailyPlayedDate,
       }
     : {
         initials: 'G',
@@ -132,6 +152,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         friendCode: '',
         coins: storedData.coins,
         stats: storedData.stats,
+        playHistory: storedData.playHistory,
+        dailyPlayedDate: storedData.dailyPlayedDate,
       }
 
   // Sync user to D1 after Clerk loads.
@@ -173,17 +195,63 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try { localStorage.setItem(key, JSON.stringify(synced)) } catch { /* quota */ }
       setStoredData(synced)
     }).catch(console.error)
+
+    // Load inventory
+    getInventory(clerkUser.id)
+      .then((res: { inventory?: InventoryItem[] }) => {
+        if (res?.inventory) {
+          setInventory(res.inventory)
+          // Seed default items locally if inventory is empty (table may not exist on older accounts)
+          if (res.inventory.length === 0) {
+            setInventory([
+              { item_type: 'avatar_color', item_id: 'teal', equipped: 1 },
+              { item_type: 'theme', item_id: 'classic', equipped: 1 },
+              { item_type: 'card_back', item_id: 'teal', equipped: 1 },
+            ])
+          }
+        }
+      }).catch(() => {
+        // Fallback to defaults if API unavailable
+        setInventory([
+          { item_type: 'avatar_color', item_id: 'teal', equipped: 1 },
+          { item_type: 'theme', item_id: 'classic', equipped: 1 },
+          { item_type: 'card_back', item_id: 'teal', equipped: 1 },
+        ])
+      })
   }, [clerkUser?.id])
 
   function recordResult(result: GameResult) {
     const earned = calcCoins(result)
+    const today = new Date().toISOString().slice(0, 10)
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    const history = storedData.playHistory.includes(today)
+      ? storedData.playHistory
+      : [...storedData.playHistory.slice(-29), today]
+
+    // Streak: only recalculate if this is the first game today
+    const alreadyPlayedToday = storedData.playHistory.includes(today)
+    let newStreak = storedData.stats.streak
+    if (!alreadyPlayedToday && result.won) {
+      if (storedData.playHistory.includes(yesterday)) {
+        newStreak = storedData.stats.streak + 1
+      } else {
+        newStreak = 1
+      }
+    } else if (!alreadyPlayedToday && !result.won) {
+      // A loss on a new day: streak resets only if they haven't won today yet
+      // (we keep it if they already have a win today — but we can't know that from local data alone)
+      // Conservative: don't touch streak on first loss of the day if they haven't built today's yet
+      newStreak = storedData.stats.streak
+    }
     const newData: StoredData = {
       ...storedData,
+      playHistory: history,
+      dailyPlayedDate: result.mode === 'daily' ? today : storedData.dailyPlayedDate,
       coins: storedData.coins + earned,
       stats: {
         played: storedData.stats.played + 1,
         wins: storedData.stats.wins + (result.won ? 1 : 0),
-        streak: result.won ? storedData.stats.streak + 1 : 0,
+        streak: newStreak,
         perfect: storedData.stats.perfect + (result.won && result.strikes === 0 ? 1 : 0),
       },
     }
@@ -194,14 +262,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (clerkUser) {
       apiRecordResult({
         userId: clerkUser.id,
-        puzzleId: 1, // TODO: use actual puzzle id once SortGame loads from API
-        mode: 'freeplay',
+        puzzleId: result.puzzleId ?? 0,
+        mode: result.mode ?? 'freeplay',
         won: result.won,
         strikes: result.strikes,
         durationSeconds: result.durationSeconds,
         coinsEarned: earned,
       }).catch(console.error)
     }
+  }
+
+  async function buyItem(itemType: string, itemId: string, price: number) {
+    if (!clerkUser) return
+    const res = await apiBuyItem({ userId: clerkUser.id, itemType, itemId, price })
+    // Update local coin balance
+    const newData: StoredData = { ...storedData, coins: res.coins ?? storedData.coins - price }
+    saveData(newData)
+    // Add to local inventory
+    setInventory(prev => [...prev, { item_type: itemType, item_id: itemId, equipped: 0 }])
+  }
+
+  async function equipItem(itemType: string, itemId: string) {
+    if (!clerkUser) return
+    await apiEquipItem({ userId: clerkUser.id, itemType, itemId })
+    // Update avatar color in stored data if relevant
+    if (itemType === 'avatar_color') {
+      const colorMap: Record<string, string> = {
+        teal: '#5DCAA5', blue: '#185FA5', amber: '#EF9F27', coral: '#E24B4A',
+        indigo: '#5B5EA6', mint: '#9FE1CB', slate: '#4A6FA5', gold: '#D4A017',
+      }
+      const hex = colorMap[itemId]
+      if (hex) saveData({ ...storedData, avatarColor: hex })
+    }
+    setInventory(prev =>
+      prev.map(item =>
+        item.item_type === itemType
+          ? { ...item, equipped: item.item_id === itemId ? 1 : 0 }
+          : item
+      )
+    )
   }
 
   async function signOut() {
@@ -216,7 +315,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider
-      value={{ user, isLoaded, isSignedIn, guestMode, guestGamePlayed, setGuestMode, recordResult, signOut }}
+      value={{ user, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, setGuestMode, recordResult, buyItem, equipItem, signOut }}
     >
       {children}
     </AppContext.Provider>
