@@ -113,6 +113,7 @@ export default function BlitzGame({ onBack, onSignUp, mode = 'freeplay' }: Props
       streak: user.stats.streak,
       puzzleId,
       mode: mode === 'daily' ? 'daily' : 'freeplay',
+      gameType: 'blitz' as const,
       isMonthlySpecial,
     }
     recordResult(result)
@@ -187,6 +188,7 @@ export default function BlitzGame({ onBack, onSignUp, mode = 'freeplay' }: Props
       streak: user.stats.streak,
       puzzleId,
       mode: mode === 'daily' ? 'daily' : 'freeplay',
+      gameType: 'blitz' as const,
       isMonthlySpecial,
     }
     const coinsEarned = calcCoins(result)

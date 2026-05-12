@@ -136,6 +136,7 @@ export default function PairsGame({ onBack, onSignUp, mode = 'freeplay' }: Props
             streak: user.stats.streak,
             puzzleId,
             mode: mode === 'daily' ? 'daily' : 'freeplay',
+            gameType: 'pairs' as const,
             isMonthlySpecial,
           }
           recordResult(result)
@@ -173,6 +174,7 @@ export default function PairsGame({ onBack, onSignUp, mode = 'freeplay' }: Props
       streak: user.stats.streak,
       puzzleId,
       mode: mode === 'daily' ? 'daily' : 'freeplay',
+      gameType: 'pairs' as const,
       isMonthlySpecial,
     }
     const coinsEarned = calcCoins(result)

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './index.css'
 import Header from './components/Header'
 import DailySortCard from './components/DailySortCard'
+import DailyGamesRow from './components/DailyGamesRow'
 import GameGrid from './components/GameGrid'
 import BottomNav from './components/BottomNav'
 import SortGame from './screens/SortGame'
@@ -139,6 +140,11 @@ function App() {
         {activeTab === 'games' && (
           <>
             <DailySortCard onPlay={() => launchSort('daily')} />
+            <DailyGamesRow
+              onPlayImpostor={() => launchImpostor('daily')}
+              onPlayPairs={() => launchPairs('daily')}
+              onPlayBlitz={() => launchBlitz('daily')}
+            />
             <GameGrid
               onPlaySort={() => launchSort('freeplay')}
               onPlayImpostor={() => launchImpostor('freeplay')}

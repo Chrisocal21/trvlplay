@@ -18,7 +18,8 @@ export interface AppUser {
   coins: number
   stats: UserStats
   playHistory: string[]
-  dailyPlayedDate: string
+  dailyPlayedDate: string  // legacy — Sort's last daily date
+  dailyPlayedDates: Record<string, string>  // per-game daily played dates
   setupComplete: boolean
 }
 
@@ -29,6 +30,7 @@ export interface GameResult {
   streak: number          // streak at the time the game ended (before this result updates it)
   puzzleId?: number
   mode?: 'daily' | 'freeplay'
+  gameType?: 'sort' | 'impostor' | 'pairs' | 'blitz'
   isMonthlySpecial?: boolean
 }
 
@@ -38,7 +40,8 @@ interface StoredData {
   avatarColor: string
   customUsername: string   // set during onboarding, overrides Clerk name
   playHistory: string[]  // ISO date strings 'YYYY-MM-DD' of days played
-  dailyPlayedDate: string  // last date a daily Sort was completed, 'YYYY-MM-DD' or ''
+  dailyPlayedDate: string  // legacy — kept for backward compat, prefer dailyPlayedDates.sort
+  dailyPlayedDates: Record<string, string>  // gameType -> last daily played date 'YYYY-MM-DD'
   setupComplete: boolean  // true after first-time onboarding is submitted
 }
 
@@ -74,6 +77,7 @@ const DEFAULT_STORED: StoredData = {
   customUsername: '',
   playHistory: [],
   dailyPlayedDate: '',
+  dailyPlayedDates: {},
   setupComplete: false,
 }
 
@@ -162,7 +166,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         coins: storedData.coins,
         stats: storedData.stats,
         playHistory: storedData.playHistory,
-        dailyPlayedDate: storedData.dailyPlayedDate,
+        dailyPlayedDate: storedData.dailyPlayedDates?.sort ?? storedData.dailyPlayedDate,
+        dailyPlayedDates: storedData.dailyPlayedDates ?? {},
         setupComplete: storedData.setupComplete,
       }
     : {
@@ -174,7 +179,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         coins: storedData.coins,
         stats: storedData.stats,
         playHistory: storedData.playHistory,
-        dailyPlayedDate: storedData.dailyPlayedDate,
+        dailyPlayedDate: storedData.dailyPlayedDates?.sort ?? storedData.dailyPlayedDate,
+        dailyPlayedDates: storedData.dailyPlayedDates ?? {},
         setupComplete: true,
       }
 
@@ -279,10 +285,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       // Conservative: don't touch streak on first loss of the day if they haven't built today's yet
       newStreak = storedData.stats.streak
     }
+    const gameType = result.gameType ?? 'sort'
+    const newDailyPlayedDates = result.mode === 'daily'
+      ? { ...(storedData.dailyPlayedDates ?? {}), [gameType]: today }
+      : (storedData.dailyPlayedDates ?? {})
     const newData: StoredData = {
       ...storedData,
       playHistory: history,
-      dailyPlayedDate: result.mode === 'daily' ? today : storedData.dailyPlayedDate,
+      dailyPlayedDate: gameType === 'sort' && result.mode === 'daily' ? today : storedData.dailyPlayedDate,
+      dailyPlayedDates: newDailyPlayedDates,
       coins: storedData.coins + earned,
       stats: {
         played: storedData.stats.played + 1,

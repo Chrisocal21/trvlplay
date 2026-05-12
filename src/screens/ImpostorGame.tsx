@@ -118,6 +118,7 @@ export default function ImpostorGame({ onBack, onSignUp, mode = 'freeplay' }: Pr
           streak: user.stats.streak,
           puzzleId,
           mode: mode === 'daily' ? 'daily' : 'freeplay',
+          gameType: 'impostor',
           isMonthlySpecial,
         }
         recordResult(result)
@@ -157,6 +158,7 @@ export default function ImpostorGame({ onBack, onSignUp, mode = 'freeplay' }: Pr
       streak: user.stats.streak,
       puzzleId,
       mode: mode === 'daily' ? 'daily' : 'freeplay',
+      gameType: 'impostor' as const,
       isMonthlySpecial,
     }
     const coinsEarned = calcCoins(result)

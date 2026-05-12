@@ -41,10 +41,10 @@ const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 export default function DailySortCard({ onPlay }: { onPlay: () => void }) {
   const countdown = useCountdown()
   const { user } = useApp()
-  const { stats, playHistory, dailyPlayedDate } = user
+  const { stats, playHistory, dailyPlayedDates } = user
 
   const today = new Date().toISOString().slice(0, 10)
-  const alreadyPlayedToday = dailyPlayedDate === today
+  const alreadyPlayedToday = (dailyPlayedDates?.sort ?? '') === today
 
   const winRate = stats.played > 0
     ? Math.round((stats.wins / stats.played) * 100)
