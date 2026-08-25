@@ -50,9 +50,10 @@ interface Props {
   onBack: () => void
   onSignUp?: () => void
   mode?: 'daily' | 'freeplay'
+  dailyTier?: 'k12' | 'expert'
 }
 
-export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props) {
+export default function SortGame({ onBack, onSignUp, mode = 'freeplay', dailyTier = 'k12' }: Props) {
   const { recordResult, user, userId, guestMode } = useApp()
   const [puzzle, setPuzzle] = useState<Group[] | null>(null)
   const [puzzleId, setPuzzleId] = useState<number>(0)
@@ -69,7 +70,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
 
   // Fetch puzzle from API on mount
   useEffect(() => {
-    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId)
+    const fetch = mode === 'daily' ? getDailyPuzzle(dailyTier) : getFreePuzzle(userId, [], user.wordDifficulty)
     fetch
       .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[]; isMonthlySpecial?: boolean } }) => {
         const groups: Group[] = res.puzzle.groups.map((g, i) => ({
@@ -165,7 +166,7 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
     setSelected(new Set())
     setLoading(true)
     startTime.current = Date.now()
-    getFreePuzzle(userId, userId ? [] : guestSeenIds)
+    getFreePuzzle(userId, userId ? [] : guestSeenIds, user.wordDifficulty)
       .then((res: { puzzle: { id: number; groups: { label: string; items: string[] }[] } }) => {
         const groups: Group[] = res.puzzle.groups.map((g, i) => ({
           label: g.label,
@@ -230,7 +231,9 @@ export default function SortGame({ onBack, onSignUp, mode = 'freeplay' }: Props)
         </button>
         <h1 className="text-[#E1F5EE] text-lg font-black tracking-tight">Sort</h1>
         {mode === 'daily' && (
-          <span className="ml-auto text-[#9FE1CB] text-xs font-black uppercase tracking-widest">Daily</span>
+          <span className="ml-auto text-[#9FE1CB] text-xs font-black uppercase tracking-widest">
+            {dailyTier === 'expert' ? 'Daily · Hard Mode' : 'Daily'}
+          </span>
         )}
       </div>
 

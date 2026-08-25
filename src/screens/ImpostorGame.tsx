@@ -67,7 +67,7 @@ export default function ImpostorGame({ onBack, onSignUp, mode = 'freeplay' }: Pr
   const gameStart = useRef(Date.now())
 
   useEffect(() => {
-    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId)
+    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId, [], user.wordDifficulty)
     fetch
       .then((res: { puzzle: { id: number; groups: PuzzleGroup[]; isMonthlySpecial?: boolean } }) => {
         setRounds(generateRounds(res.puzzle.groups))
@@ -258,7 +258,7 @@ export default function ImpostorGame({ onBack, onSignUp, mode = 'freeplay' }: Pr
                   setScore(0)
                   setRoundTimes([])
                   setIsMonthlySpecial(false)
-                  getFreePuzzle(userId)
+                  getFreePuzzle(userId, [], user.wordDifficulty)
                     .then((res: { puzzle: { id: number; groups: PuzzleGroup[] } }) => {
                       setRounds(generateRounds(res.puzzle.groups))
                       setPuzzleId(res.puzzle.id)

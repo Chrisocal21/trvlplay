@@ -42,17 +42,19 @@ export async function recordResult(data: {
   })
 }
 
-export async function getDailyPuzzle() {
-  return apiFetch('/api/puzzles/daily')
+export async function getDailyPuzzle(tier?: string) {
+  const qs = tier ? `?tier=${tier}` : ''
+  return apiFetch(`/api/puzzles/daily${qs}`)
 }
 
-export async function getFreePuzzle(userId?: string | null, excludeIds: number[] = []) {
+export async function getFreePuzzle(userId?: string | null, excludeIds: number[] = [], tier?: string) {
   const params = new URLSearchParams()
   if (userId) {
     params.set('userId', userId)
   } else if (excludeIds.length) {
     params.set('exclude', excludeIds.join(','))
   }
+  if (tier) params.set('tier', tier)
   const qs = params.toString() ? `?${params.toString()}` : ''
   return apiFetch(`/api/puzzles/freeplay${qs}`)
 }

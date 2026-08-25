@@ -32,10 +32,12 @@ CREATE TABLE IF NOT EXISTS coin_transactions (
 );
 
 -- Puzzles
+-- difficulty is a vocabulary tier: 'k12' (everyday words, standard for all Dailies),
+-- 'college', or 'expert' (opt-in hard mode). Legacy rows may still carry 'easy'/'medium'/'hard'.
 CREATE TABLE IF NOT EXISTS puzzles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  daily_date TEXT UNIQUE,           -- NULL = free play only, 'YYYY-MM-DD' = daily
-  difficulty TEXT NOT NULL DEFAULT 'medium',
+  daily_date TEXT,                  -- NULL = free play only, 'YYYY-MM-DD' = daily
+  difficulty TEXT NOT NULL DEFAULT 'k12',
   group1_label TEXT NOT NULL,
   group1_items TEXT NOT NULL,       -- JSON array of 4 strings
   group2_label TEXT NOT NULL,
@@ -44,7 +46,8 @@ CREATE TABLE IF NOT EXISTS puzzles (
   group3_items TEXT NOT NULL,
   group4_label TEXT NOT NULL,
   group4_items TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(daily_date, difficulty)    -- one row per tier per calendar date (e.g. k12 + expert variant)
 );
 
 -- Game results

@@ -38,10 +38,11 @@ function getLastNDates(n: number): string[] {
 
 const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
-export default function DailySortCard({ onPlay }: { onPlay: () => void }) {
+export default function DailySortCard({ onPlay }: { onPlay: (hardMode: boolean) => void }) {
   const countdown = useCountdown()
   const { user } = useApp()
   const { stats, playHistory, dailyPlayedDates } = user
+  const [hardMode, setHardMode] = useState(false)
 
   const today = new Date().toISOString().slice(0, 10)
   const alreadyPlayedToday = (dailyPlayedDates?.sort ?? '') === today
@@ -126,9 +127,20 @@ export default function DailySortCard({ onPlay }: { onPlay: () => void }) {
               Come back tomorrow
             </div>
           ) : (
-            <button onClick={onPlay} className="mt-4 w-full bg-[#185FA5] text-[#E1F5EE] font-bold rounded-2xl py-4 text-base shadow-lg">
-              Play Daily Sort
-            </button>
+            <>
+              <button
+                onClick={() => setHardMode(v => !v)}
+                className="mt-4 flex items-center gap-2 self-start"
+              >
+                <div className={`w-9 h-5 rounded-full transition-colors relative ${hardMode ? 'bg-[#085041]' : 'bg-[#9FE1CB]'}`}>
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-[#E1F5EE] transition-all ${hardMode ? 'left-4' : 'left-0.5'}`} />
+                </div>
+                <span className="text-[#085041] text-xs font-black uppercase tracking-wide">Hard mode</span>
+              </button>
+              <button onClick={() => onPlay(hardMode)} className="mt-3 w-full bg-[#185FA5] text-[#E1F5EE] font-bold rounded-2xl py-4 text-base shadow-lg">
+                Play Daily Sort
+              </button>
+            </>
           )}
         </div>
       </div>

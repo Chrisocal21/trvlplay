@@ -21,12 +21,18 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+const WORD_DIFFICULTIES = [
+  { id: 'k12' as const,     label: 'K-12',     hint: 'Everyday words. Same as the Daily.' },
+  { id: 'college' as const, label: 'College',  hint: 'Less common words, still gettable.' },
+  { id: 'expert' as const,  label: 'Expert',   hint: 'Rare words. A real stretch.' },
+]
+
 interface Props {
   onGoToFriends: () => void
 }
 
 export default function ProfileScreen({ onGoToFriends }: Props) {
-  const { user, isSignedIn, signOut, updateProfile, medallions } = useApp()
+  const { user, isSignedIn, signOut, updateProfile, setWordDifficulty, medallions } = useApp()
   const [copied, setCopied] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editUsername, setEditUsername] = useState(user.username)
@@ -193,6 +199,35 @@ export default function ProfileScreen({ onGoToFriends }: Props) {
             </div>
           </div>
         )}
+
+        {/* Word difficulty — Free Play only. The Daily always uses K-12 for everyone. */}
+        <div className="bg-[#5DCAA5] rounded-2xl overflow-hidden flex shadow-sm">
+          <div className="w-1.5 bg-[#185FA5] shrink-0" />
+          <div className="flex-1 px-4 py-4">
+            <p className="text-[#085041] text-[10px] font-black uppercase tracking-[0.14em] mb-1">Word Difficulty</p>
+            <p className="text-[#0F6E56] text-xs mb-3">Applies to Free Play. The Daily always stays K-12 for everyone.</p>
+            <div className="flex gap-2">
+              {WORD_DIFFICULTIES.map(d => (
+                <button
+                  key={d.id}
+                  onClick={() => setWordDifficulty(d.id)}
+                  className={`flex-1 rounded-xl px-2 py-2.5 text-center transition-all ${
+                    user.wordDifficulty === d.id
+                      ? 'bg-[#085041]'
+                      : 'bg-[#9FE1CB]'
+                  }`}
+                >
+                  <span className={`block text-xs font-black ${
+                    user.wordDifficulty === d.id ? 'text-[#E1F5EE]' : 'text-[#085041]'
+                  }`}>{d.label}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-[#0F6E56] text-[11px] mt-2">
+              {WORD_DIFFICULTIES.find(d => d.id === user.wordDifficulty)?.hint}
+            </p>
+          </div>
+        </div>
 
         {/* Stats grid */}
         <div>

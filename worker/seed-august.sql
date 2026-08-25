@@ -210,72 +210,72 @@ VALUES (
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-24', 'hard',
-  'Words meaning to withdraw', '["RECEDE","RETRACT","ABDICATE","RESCIND"]',
-  'Types of government',       '["OLIGARCHY","THEOCRACY","TECHNOCRACY","PLUTOCRACY"]',
-  'Famous codes',              '["MORSE","HAMMURABI","JUSTINIAN","NAPOLEONIC"]',
-  'Parts of a drama',          '["CATHARSIS","ANAGNORISIS","PERIPETEIA","HAMARTIA"]'
+  '2026-08-24', 'k12',
+  'Farm animals',              '["COW","PIG","HORSE","SHEEP"]',
+  'Things with a box',         '["LUNCH","MAIL","TOOL","SAND"]',
+  'Things that are cold',      '["ICE","SNOW","WINTER","FREEZER"]',
+  'Card games',                '["POKER","RUMMY","SNAP","WAR"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-25', 'easy',
-  'Things that are circular',  '["CLOCK","PIZZA","RECORD","COIN"]',
-  'Things you do at the gym',  '["SQUAT","PLANK","ROW","PRESS"]',
-  'Things that are woolen',    '["SWEATER","BLANKET","RUG","SCARF"]',
-  'Parts of a book',           '["SPINE","INDEX","CHAPTER","FOREWORD"]'
+  '2026-08-25', 'k12',
+  'Breakfast foods',           '["EGGS","BACON","TOAST","CEREAL"]',
+  'Things with a ball',        '["BASKET","FOOT","BASE","EYE"]',
+  'Ocean animals',             '["SHARK","WHALE","DOLPHIN","OCTOPUS"]',
+  'Things that are loud',      '["THUNDER","SIREN","DRUM","ALARM"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-26', 'medium',
-  'Things that are rhythmic',  '["PULSE","TIDE","METRONOME","HEARTBEAT"]',
-  'Types of vault',            '["BARREL","GROIN","RIBBED","FAN"]',
-  'Words for hesitant',        '["TENTATIVE","RELUCTANT","WAVERING","AMBIVALENT"]',
-  'Things you anchor',         '["SHIP","TENT","ARGUMENT","BROADCAST"]'
+  '2026-08-26', 'k12',
+  'School supplies',           '["PENCIL","ERASER","RULER","GLUE"]',
+  'Things with a board',       '["KEY","SURF","CARD","CHESS"]',
+  'Types of weather',          '["RAIN","SNOW","WIND","FOG"]',
+  'Things at a birthday party','["CAKE","BALLOON","CANDLE","PRESENT"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-27', 'hard',
-  'Words meaning to flourish', '["THRIVE","BURGEON","PROLIFERATE","PROSPER"]',
-  'Types of memory in computing','["CACHE","BUFFER","REGISTER","HEAP"]',
-  'Famous manifestos',         '["COMMUNIST","FUTURIST","SURREALIST","DADA"]',
-  'Parts of a legal argument', '["PREMISE","INFERENCE","CONCLUSION","REBUTTAL"]'
+  '2026-08-27', 'k12',
+  'Zoo animals',                '["LION","TIGER","BEAR","MONKEY"]',
+  'Things with a light',        '["FLASH","SUN","MOON","SPOT"]',
+  'Vegetables',                 '["CARROT","POTATO","BROCCOLI","CORN"]',
+  'Things you ride',            '["BIKE","BUS","TRAIN","HORSE"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-28', 'easy',
-  'Things at a market',        '["STALL","SCALE","BASKET","VENDOR"]',
-  'Things that are loud',      '["THUNDER","CROWD","JET","DRUM"]',
-  'Things you press',          '["FLOWER","SHIRT","BUTTON","RECORD"]',
-  'Types of grain',            '["WHEAT","BARLEY","MILLET","SPELT"]'
+  '2026-08-28', 'k12',
+  'Things in a kitchen',       '["OVEN","FORK","SPOON","PLATE"]',
+  'Types of boats',            '["SAIL","ROW","SPEED","LIFE"]',
+  'Fruits',                    '["APPLE","BANANA","GRAPE","ORANGE"]',
+  'Things that fly',           '["BIRD","KITE","PLANE","BALLOON"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-29', 'medium',
-  'Things that are elastic',   '["RUBBER BAND","CARTILAGE","SPRING","WAISTBAND"]',
-  'Types of dam',              '["GRAVITY","ARCH","BUTTRESS","EMBANKMENT"]',
-  'Words for honest',          '["CANDID","FORTHRIGHT","GUILELESS","TRANSPARENT"]',
-  'Things that are braided',   '["HAIR","BREAD","ROPE","RIVER"]'
+  '2026-08-29', 'k12',
+  'Board games',               '["CHESS","CHECKERS","MONOPOLY","SORRY"]',
+  'Types of cake',             '["PAN","CUP","FRUIT","SHORT"]',
+  'Tools',                     '["HAMMER","WRENCH","SAW","DRILL"]',
+  'Sports',                    '["SOCCER","TENNIS","HOCKEY","GOLF"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-30', 'hard',
-  'Words meaning to scatter',  '["DISPERSE","DISSIPATE","DIFFUSE","STREW"]',
-  'Types of paradox',          '["ZENO","LIAR","TWIN","BOOTSTRAP"]',
-  'Parts of a courtroom',      '["DOCK","BENCH","BAR","GALLERY"]',
-  'Famous architects works',   '["FALLINGWATER","GUGGENHEIM","SAGRADA FAMILIA","POMPIDOU"]'
+  '2026-08-30', 'k12',
+  'Things that melt',          '["ICE","SNOW","BUTTER","CHOCOLATE"]',
+  'Types of houses',           '["TREE","DOLL","LIGHT","GREEN"]',
+  'Insects',                   '["ANT","BEE","FLY","LADYBUG"]',
+  'Superheroes',               '["BATMAN","SUPERMAN","SPIDERMAN","HULK"]'
 );
 
 INSERT OR IGNORE INTO puzzles (daily_date, difficulty, group1_label, group1_items, group2_label, group2_items, group3_label, group3_items, group4_label, group4_items)
 VALUES (
-  '2026-08-31', 'easy',
-  'Things at the end of summer','["SUNBURN","SCHOOL SUPPLY","HARVEST","CRICKET"]',
+  '2026-08-31', 'k12',
+  'Things at the end of summer','["SUNBURN","BACKPACK","HARVEST","CRICKET"]',
   'Things that are golden',    '["HONEY","WHEAT","SUNSET","RETRIEVER"]',
-  'Things you save',           '["MONEY","FILE","SEAT","ENERGY"]',
-  'Things that close a chapter','["GRADUATION","MOVE","BREAKUP","FAREWELL"]'
+  'Things you save',           '["MONEY","SEAT","ENERGY","TIME"]',
+  'Things that end something', '["GRADUATION","GOODBYE","FINISH","CREDITS"]'
 );

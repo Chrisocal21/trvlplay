@@ -180,37 +180,60 @@ export default {
         return json({ ok: true, coins, medallionEarned }, 200, request)
       }
 
-      // GET /api/puzzles/daily
+      // GET /api/puzzles/daily?tier=k12|college|expert (default k12)
       if (path === '/api/puzzles/daily' && request.method === 'GET') {
-        const puzzle = await env.trvlplay_db.prepare(
-          "SELECT * FROM puzzles WHERE daily_date = date('now') LIMIT 1"
-        ).first()
+        const tier = url.searchParams.get('tier') || 'k12'
+
+        let puzzle = await env.trvlplay_db.prepare(
+          "SELECT * FROM puzzles WHERE daily_date = date('now') AND difficulty = ? LIMIT 1"
+        ).bind(tier).first()
+
+        // Older dates predate the tier system — fall back to whatever row exists for today
+        if (!puzzle) {
+          puzzle = await env.trvlplay_db.prepare(
+            "SELECT * FROM puzzles WHERE daily_date = date('now') LIMIT 1"
+          ).first()
+        }
         if (!puzzle) return err('No daily puzzle today', 404, request)
+
+        const availableTiers = await env.trvlplay_db.prepare(
+          "SELECT DISTINCT difficulty FROM puzzles WHERE daily_date = date('now')"
+        ).all<{ difficulty: string }>()
+
         const todayStr = new Date().toISOString().slice(0, 10)  // 'YYYY-MM-DD'
         const isMonthlySpecial = todayStr.slice(8, 10) === '01'
-        return json({ puzzle: { ...parsePuzzle(puzzle), isMonthlySpecial } }, 200, request)
+        return json({
+          puzzle: { ...parsePuzzle(puzzle), isMonthlySpecial },
+          availableTiers: availableTiers.results.map(r => r.difficulty),
+        }, 200, request)
       }
 
       // GET /api/puzzles/freeplay?userId=xxx   (signed-in: dedup via game_results)
       // GET /api/puzzles/freeplay?exclude=1,2,3 (guest: client-supplied exclude list)
+      // Both accept &tier=k12|college|expert to restrict the pool by vocabulary difficulty
       if (path === '/api/puzzles/freeplay' && request.method === 'GET') {
         const userId = url.searchParams.get('userId')
         const exclude = url.searchParams.get('exclude') ?? ''
         const excludeIds = exclude.split(',').map(Number).filter(Boolean)
+        const tier = url.searchParams.get('tier')
 
         let puzzle = null
 
         if (userId) {
           // Exclude puzzles this user has already played (from game_results)
-          puzzle = await env.trvlplay_db.prepare(`
-            SELECT * FROM puzzles
-            WHERE id NOT IN (
-              SELECT puzzle_id FROM game_results WHERE user_id = ?
-            )
-            ORDER BY RANDOM() LIMIT 1
-          `).bind(userId).first()
+          const clauses = ['id NOT IN (SELECT puzzle_id FROM game_results WHERE user_id = ?)']
+          const binds: unknown[] = [userId]
+          if (tier) { clauses.push('difficulty = ?'); binds.push(tier) }
+          puzzle = await env.trvlplay_db.prepare(
+            `SELECT * FROM puzzles WHERE ${clauses.join(' AND ')} ORDER BY RANDOM() LIMIT 1`
+          ).bind(...binds).first()
 
-          // Pool exhausted — reset and serve any puzzle
+          // Pool exhausted for this tier — reset within the tier first, then any puzzle
+          if (!puzzle && tier) {
+            puzzle = await env.trvlplay_db.prepare(
+              'SELECT * FROM puzzles WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1'
+            ).bind(tier).first()
+          }
           if (!puzzle) {
             puzzle = await env.trvlplay_db.prepare(
               'SELECT * FROM puzzles ORDER BY RANDOM() LIMIT 1'
@@ -218,16 +241,24 @@ export default {
           }
         } else {
           // Guest path: use client-supplied exclude list
-          let query = 'SELECT * FROM puzzles'
+          const clauses: string[] = []
           const binds: unknown[] = []
           if (excludeIds.length) {
-            query += ` WHERE id NOT IN (${excludeIds.map(() => '?').join(',')})`
+            clauses.push(`id NOT IN (${excludeIds.map(() => '?').join(',')})`)
             binds.push(...excludeIds)
           }
+          if (tier) { clauses.push('difficulty = ?'); binds.push(tier) }
+          let query = 'SELECT * FROM puzzles'
+          if (clauses.length) query += ` WHERE ${clauses.join(' AND ')}`
           query += ' ORDER BY RANDOM() LIMIT 1'
           puzzle = await env.trvlplay_db.prepare(query).bind(...binds).first()
 
-          // Pool exhausted for guest — reset
+          // Pool exhausted for guest — reset within the tier first, then any puzzle
+          if (!puzzle && tier) {
+            puzzle = await env.trvlplay_db.prepare(
+              'SELECT * FROM puzzles WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1'
+            ).bind(tier).first()
+          }
           if (!puzzle) {
             puzzle = await env.trvlplay_db.prepare(
               'SELECT * FROM puzzles ORDER BY RANDOM() LIMIT 1'

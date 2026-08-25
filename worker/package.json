@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "check-words": "node scripts/check-word-difficulty.js",
+    "build-seed": "node scripts/build-seed-from-queue.js"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250508.0",

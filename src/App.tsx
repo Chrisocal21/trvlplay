@@ -23,7 +23,7 @@ type Tab = 'games' | 'friends' | 'shop' | 'profile'
 type Screen = 'home' | 'sort' | 'impostor' | 'pairs' | 'blitz'
 
 function App() {
-  const { guestMode, guestGamePlayed, exitGuestMode, userId } = useApp()
+  const { guestMode, guestGamePlayed, exitGuestMode, userId, user } = useApp()
   const [activeTab, setActiveTab] = useState<Tab>('games')
   const [screen, setScreen] = useState<Screen>('home')
 
@@ -36,7 +36,7 @@ function App() {
     async function prefetch() {
       for (let i = 0; i < needed; i++) {
         try {
-          const res = await getFreePuzzle(userId) as { puzzle: { id: number; groups: { label: string; items: string[] }[] } }
+          const res = await getFreePuzzle(userId, [], user.wordDifficulty) as { puzzle: { id: number; groups: { label: string; items: string[] }[] } }
           cachePuzzle({ id: res.puzzle.id, groups: res.puzzle.groups })
           // Small gap between requests — don't hammer the API
           await new Promise(r => setTimeout(r, 300))
@@ -51,17 +51,19 @@ function App() {
     return () => clearTimeout(timer)
   }, [userId])
   const [sortMode, setSortMode] = useState<'daily' | 'freeplay'>('freeplay')
+  const [sortDailyTier, setSortDailyTier] = useState<'k12' | 'expert'>('k12')
   const [impostorMode, setImpostorMode] = useState<'daily' | 'freeplay'>('freeplay')
   const [pairsMode, setPairsMode] = useState<'daily' | 'freeplay'>('freeplay')
   const [blitzMode, setBlitzMode] = useState<'daily' | 'freeplay'>('freeplay')
 
-  function launchSort(mode: 'daily' | 'freeplay') {
+  function launchSort(mode: 'daily' | 'freeplay', hardMode = false) {
     // Guest who already played one game must sign up to play again
     if (guestMode && guestGamePlayed) {
       exitGuestMode()
       return
     }
     setSortMode(mode)
+    setSortDailyTier(hardMode ? 'expert' : 'k12')
     setScreen('sort')
   }
 
@@ -98,6 +100,7 @@ function App() {
         onBack={() => setScreen('home')}
         onSignUp={exitGuestMode}
         mode={sortMode}
+        dailyTier={sortDailyTier}
       />
     )
   }
@@ -139,7 +142,7 @@ function App() {
       <main>
         {activeTab === 'games' && (
           <>
-            <DailySortCard onPlay={() => launchSort('daily')} />
+            <DailySortCard onPlay={(hardMode) => launchSort('daily', hardMode)} />
             <DailyGamesRow
               onPlayImpostor={() => launchImpostor('daily')}
               onPlayPairs={() => launchPairs('daily')}

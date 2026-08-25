@@ -9,6 +9,8 @@ export interface UserStats {
   perfect: number
 }
 
+export type WordDifficulty = 'k12' | 'college' | 'expert'
+
 export interface AppUser {
   initials: string
   username: string
@@ -21,6 +23,7 @@ export interface AppUser {
   dailyPlayedDate: string  // legacy — Sort's last daily date
   dailyPlayedDates: Record<string, string>  // per-game daily played dates
   setupComplete: boolean
+  wordDifficulty: WordDifficulty  // Free Play vocabulary tier; Dailies always use k12
 }
 
 export interface GameResult {
@@ -43,6 +46,7 @@ interface StoredData {
   dailyPlayedDate: string  // legacy — kept for backward compat, prefer dailyPlayedDates.sort
   dailyPlayedDates: Record<string, string>  // gameType -> last daily played date 'YYYY-MM-DD'
   setupComplete: boolean  // true after first-time onboarding is submitted
+  wordDifficulty: WordDifficulty
 }
 
 interface AppState {
@@ -61,6 +65,7 @@ interface AppState {
   recordResult: (result: GameResult) => void
   buyItem: (itemType: string, itemId: string, price: number) => Promise<void>
   equipItem: (itemType: string, itemId: string) => Promise<void>
+  setWordDifficulty: (tier: WordDifficulty) => void
   signOut: () => void
 }
 
@@ -79,6 +84,7 @@ const DEFAULT_STORED: StoredData = {
   dailyPlayedDate: '',
   dailyPlayedDates: {},
   setupComplete: false,
+  wordDifficulty: 'k12',
 }
 
 const BASE_COINS = 100
@@ -169,6 +175,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dailyPlayedDate: storedData.dailyPlayedDates?.sort ?? storedData.dailyPlayedDate,
         dailyPlayedDates: storedData.dailyPlayedDates ?? {},
         setupComplete: storedData.setupComplete,
+        wordDifficulty: storedData.wordDifficulty ?? 'k12',
       }
     : {
         initials: 'G',
@@ -182,6 +189,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dailyPlayedDate: storedData.dailyPlayedDates?.sort ?? storedData.dailyPlayedDate,
         dailyPlayedDates: storedData.dailyPlayedDates ?? {},
         setupComplete: true,
+        wordDifficulty: storedData.wordDifficulty ?? 'k12',
       }
 
   // Sync user to D1 after Clerk loads.
@@ -355,6 +363,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  function setWordDifficulty(tier: WordDifficulty) {
+    saveData({ ...storedData, wordDifficulty: tier })
+  }
+
   async function signOut() {
     await clerkSignOut()
     setGuestModeState(false)
@@ -405,7 +417,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider
-      value={{ user, userId: clerkUser?.id ?? null, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, medallions, setGuestMode, exitGuestMode, completeSetup, updateProfile, recordResult, buyItem, equipItem, signOut }}
+      value={{ user, userId: clerkUser?.id ?? null, isLoaded, isSignedIn, guestMode, guestGamePlayed, inventory, medallions, setGuestMode, exitGuestMode, completeSetup, updateProfile, recordResult, buyItem, equipItem, setWordDifficulty, signOut }}
     >
       {children}
     </AppContext.Provider>

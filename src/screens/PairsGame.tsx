@@ -74,7 +74,7 @@ export default function PairsGame({ onBack, onSignUp, mode = 'freeplay' }: Props
   const gameStart = useRef(Date.now())
 
   useEffect(() => {
-    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId)
+    const fetch = mode === 'daily' ? getDailyPuzzle() : getFreePuzzle(userId, [], user.wordDifficulty)
     fetch
       .then((res: { puzzle: { id: number; groups: PuzzleGroup[]; isMonthlySpecial?: boolean } }) => {
         setCards(buildBoard(res.puzzle.groups))
@@ -281,7 +281,7 @@ export default function PairsGame({ onBack, onSignUp, mode = 'freeplay' }: Props
                   setMistakes(0)
                   setMatchCount(0)
                   setIsMonthlySpecial(false)
-                  getFreePuzzle(userId)
+                  getFreePuzzle(userId, [], user.wordDifficulty)
                     .then((res: { puzzle: { id: number; groups: PuzzleGroup[] } }) => {
                       setCards(buildBoard(res.puzzle.groups))
                       setPuzzleId(res.puzzle.id)
