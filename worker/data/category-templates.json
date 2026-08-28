@@ -1,0 +1,1303 @@
+[
+  {
+    "label": "Farm animals",
+    "items": [
+      "COW",
+      "PIG",
+      "HORSE",
+      "SHEEP",
+      "GOAT",
+      "CHICKEN",
+      "DUCK",
+      "TURKEY",
+      "DONKEY"
+    ]
+  },
+  {
+    "label": "Zoo animals",
+    "items": [
+      "LION",
+      "TIGER",
+      "BEAR",
+      "MONKEY",
+      "ELEPHANT",
+      "GIRAFFE",
+      "ZEBRA",
+      "GORILLA",
+      "PANDA"
+    ]
+  },
+  {
+    "label": "Ocean animals",
+    "items": [
+      "SHARK",
+      "WHALE",
+      "DOLPHIN",
+      "OCTOPUS",
+      "CRAB",
+      "LOBSTER",
+      "SEAL",
+      "STARFISH",
+      "JELLYFISH"
+    ]
+  },
+  {
+    "label": "Pets",
+    "items": [
+      "DOG",
+      "CAT",
+      "HAMSTER",
+      "GOLDFISH",
+      "PARROT",
+      "RABBIT",
+      "TURTLE",
+      "GUINEA PIG"
+    ]
+  },
+  {
+    "label": "Insects",
+    "items": [
+      "ANT",
+      "BEE",
+      "FLY",
+      "BEETLE",
+      "MOTH",
+      "CRICKET",
+      "GRASSHOPPER",
+      "LADYBUG"
+    ]
+  },
+  {
+    "label": "Birds",
+    "items": [
+      "EAGLE",
+      "OWL",
+      "ROBIN",
+      "SPARROW",
+      "CROW",
+      "PARROT",
+      "PENGUIN",
+      "FLAMINGO"
+    ]
+  },
+  {
+    "label": "Forest animals",
+    "items": [
+      "DEER",
+      "FOX",
+      "WOLF",
+      "RACCOON",
+      "SQUIRREL",
+      "OWL",
+      "SKUNK",
+      "BEAVER"
+    ]
+  },
+  {
+    "label": "Breakfast foods",
+    "items": [
+      "EGGS",
+      "BACON",
+      "TOAST",
+      "CEREAL",
+      "PANCAKE",
+      "WAFFLE",
+      "OATMEAL",
+      "SAUSAGE"
+    ]
+  },
+  {
+    "label": "Fruits",
+    "items": [
+      "APPLE",
+      "BANANA",
+      "GRAPE",
+      "ORANGE",
+      "PEACH",
+      "MANGO",
+      "MELON",
+      "CHERRY"
+    ]
+  },
+  {
+    "label": "Vegetables",
+    "items": [
+      "CARROT",
+      "POTATO",
+      "BROCCOLI",
+      "CORN",
+      "PEA",
+      "ONION",
+      "CELERY",
+      "PUMPKIN"
+    ]
+  },
+  {
+    "label": "Desserts",
+    "items": [
+      "CAKE",
+      "COOKIE",
+      "PIE",
+      "BROWNIE",
+      "PUDDING",
+      "DONUT",
+      "ICE CREAM",
+      "CUPCAKE"
+    ]
+  },
+  {
+    "label": "Sandwich fillings",
+    "items": [
+      "TURKEY",
+      "HAM",
+      "TUNA",
+      "PEANUT BUTTER",
+      "CHEESE",
+      "EGG",
+      "CHICKEN",
+      "JELLY"
+    ]
+  },
+  {
+    "label": "Pizza toppings",
+    "items": [
+      "CHEESE",
+      "PEPPERONI",
+      "MUSHROOM",
+      "OLIVE",
+      "SAUSAGE",
+      "ONION",
+      "PEPPER",
+      "BACON"
+    ]
+  },
+  {
+    "label": "Soup ingredients",
+    "items": [
+      "NOODLE",
+      "CARROT",
+      "CELERY",
+      "CHICKEN",
+      "POTATO",
+      "ONION",
+      "BARLEY",
+      "TOMATO"
+    ]
+  },
+  {
+    "label": "Card games",
+    "items": [
+      "POKER",
+      "RUMMY",
+      "SNAP",
+      "WAR",
+      "GO FISH",
+      "SOLITAIRE",
+      "UNO",
+      "HEARTS"
+    ]
+  },
+  {
+    "label": "Board games",
+    "items": [
+      "CHESS",
+      "CHECKERS",
+      "MONOPOLY",
+      "SORRY",
+      "SCRABBLE",
+      "CLUE",
+      "TROUBLE",
+      "LIFE"
+    ]
+  },
+  {
+    "label": "Sports",
+    "items": [
+      "SOCCER",
+      "TENNIS",
+      "HOCKEY",
+      "GOLF",
+      "BASEBALL",
+      "BASKETBALL",
+      "VOLLEYBALL",
+      "BOWLING"
+    ]
+  },
+  {
+    "label": "Winter sports",
+    "items": [
+      "SKIING",
+      "SKATING",
+      "HOCKEY",
+      "SLEDDING",
+      "SNOWBOARDING",
+      "CURLING"
+    ]
+  },
+  {
+    "label": "Playground equipment",
+    "items": [
+      "SWING",
+      "SLIDE",
+      "SEESAW",
+      "SANDBOX",
+      "MONKEY BARS",
+      "MERRY GO ROUND"
+    ]
+  },
+  {
+    "label": "School supplies",
+    "items": [
+      "PENCIL",
+      "ERASER",
+      "RULER",
+      "GLUE",
+      "CRAYON",
+      "MARKER",
+      "SCISSORS",
+      "NOTEBOOK"
+    ]
+  },
+  {
+    "label": "Types of weather",
+    "items": [
+      "RAIN",
+      "SNOW",
+      "WIND",
+      "FOG",
+      "HAIL",
+      "SLEET",
+      "THUNDER",
+      "SUNSHINE"
+    ]
+  },
+  {
+    "label": "Types of clouds",
+    "items": [
+      "CUMULUS",
+      "STORM",
+      "RAIN",
+      "FLUFFY",
+      "THUNDER",
+      "GRAY"
+    ]
+  },
+  {
+    "label": "Seasons activities",
+    "items": [
+      "SLEDDING",
+      "SWIMMING",
+      "RAKING",
+      "PLANTING",
+      "SKIING",
+      "PICNIC"
+    ]
+  },
+  {
+    "label": "Things at the beach",
+    "items": [
+      "SAND",
+      "WAVE",
+      "SHELL",
+      "TOWEL",
+      "UMBRELLA",
+      "BUCKET",
+      "SUNSCREEN",
+      "SEAGULL"
+    ]
+  },
+  {
+    "label": "Camping gear",
+    "items": [
+      "TENT",
+      "FLASHLIGHT",
+      "SLEEPING BAG",
+      "MARSHMALLOW",
+      "COMPASS",
+      "LANTERN",
+      "BACKPACK"
+    ]
+  },
+  {
+    "label": "Things in a kitchen",
+    "items": [
+      "OVEN",
+      "FORK",
+      "SPOON",
+      "PLATE",
+      "POT",
+      "PAN",
+      "KNIFE",
+      "BOWL"
+    ]
+  },
+  {
+    "label": "Kitchen appliances",
+    "items": [
+      "OVEN",
+      "FRIDGE",
+      "TOASTER",
+      "BLENDER",
+      "MICROWAVE",
+      "STOVE",
+      "MIXER"
+    ]
+  },
+  {
+    "label": "Tools",
+    "items": [
+      "HAMMER",
+      "WRENCH",
+      "SAW",
+      "DRILL",
+      "SCREWDRIVER",
+      "NAIL",
+      "LADDER",
+      "SHOVEL"
+    ]
+  },
+  {
+    "label": "Things you ride",
+    "items": [
+      "BIKE",
+      "BUS",
+      "TRAIN",
+      "HORSE",
+      "SCOOTER",
+      "SKATEBOARD",
+      "SLED",
+      "ELEVATOR"
+    ]
+  },
+  {
+    "label": "Types of boats",
+    "items": [
+      "SAIL",
+      "ROW",
+      "SPEED",
+      "LIFE",
+      "CANOE",
+      "KAYAK",
+      "TUG",
+      "FERRY"
+    ]
+  },
+  {
+    "label": "Types of trucks",
+    "items": [
+      "FIRE",
+      "DUMP",
+      "PICKUP",
+      "TOW",
+      "MONSTER",
+      "DELIVERY",
+      "GARBAGE"
+    ]
+  },
+  {
+    "label": "Things that fly",
+    "items": [
+      "BIRD",
+      "KITE",
+      "PLANE",
+      "BALLOON",
+      "BUTTERFLY",
+      "HELICOPTER",
+      "ROCKET",
+      "BAT"
+    ]
+  },
+  {
+    "label": "Farm buildings",
+    "items": [
+      "BARN",
+      "SILO",
+      "COOP",
+      "STABLE",
+      "SHED",
+      "GREENHOUSE"
+    ]
+  },
+  {
+    "label": "Types of houses",
+    "items": [
+      "TREE",
+      "DOLL",
+      "LIGHT",
+      "GREEN",
+      "BIRD",
+      "GINGERBREAD"
+    ]
+  },
+  {
+    "label": "Rooms in a house",
+    "items": [
+      "KITCHEN",
+      "BEDROOM",
+      "BATHROOM",
+      "ATTIC",
+      "BASEMENT",
+      "GARAGE",
+      "CLOSET"
+    ]
+  },
+  {
+    "label": "Types of shoes",
+    "items": [
+      "SNEAKER",
+      "SANDAL",
+      "BOOT",
+      "SLIPPER",
+      "LOAFER",
+      "FLIP FLOP",
+      "CLEAT"
+    ]
+  },
+  {
+    "label": "Winter clothing",
+    "items": [
+      "MITTEN",
+      "SCARF",
+      "BEANIE",
+      "EARMUFF",
+      "COAT",
+      "BOOT",
+      "SWEATER"
+    ]
+  },
+  {
+    "label": "Things that are round",
+    "items": [
+      "CLOCK",
+      "WHEEL",
+      "COIN",
+      "ORANGE",
+      "BALL",
+      "PIZZA",
+      "MOON",
+      "BUTTON"
+    ]
+  },
+  {
+    "label": "Things that are square",
+    "items": [
+      "WAFFLE",
+      "CHESSBOARD",
+      "WINDOW",
+      "PICTURE FRAME",
+      "BOX",
+      "TILE"
+    ]
+  },
+  {
+    "label": "Things that are cold",
+    "items": [
+      "ICE",
+      "SNOW",
+      "WINTER",
+      "FREEZER",
+      "POPSICLE",
+      "GLACIER",
+      "FROST"
+    ]
+  },
+  {
+    "label": "Things that melt",
+    "items": [
+      "ICE",
+      "SNOW",
+      "BUTTER",
+      "CHOCOLATE",
+      "CANDLE",
+      "POPSICLE",
+      "SNOWMAN"
+    ]
+  },
+  {
+    "label": "Things that are loud",
+    "items": [
+      "THUNDER",
+      "SIREN",
+      "DRUM",
+      "ALARM",
+      "JET",
+      "CROWD",
+      "HORN"
+    ]
+  },
+  {
+    "label": "Things that are soft",
+    "items": [
+      "PILLOW",
+      "COTTON",
+      "CLOUD",
+      "FUR",
+      "BLANKET",
+      "MARSHMALLOW",
+      "SPONGE"
+    ]
+  },
+  {
+    "label": "Things that are sticky",
+    "items": [
+      "HONEY",
+      "GLUE",
+      "TAPE",
+      "GUM",
+      "SYRUP",
+      "JAM",
+      "TAFFY"
+    ]
+  },
+  {
+    "label": "Things that spin",
+    "items": [
+      "TOP",
+      "WHEEL",
+      "FAN",
+      "MERRY GO ROUND",
+      "RECORD",
+      "PROPELLER"
+    ]
+  },
+  {
+    "label": "Things that glow",
+    "items": [
+      "FIREFLY",
+      "MOON",
+      "FLASHLIGHT",
+      "CANDLE",
+      "LANTERN",
+      "STAR",
+      "LAMP"
+    ]
+  },
+  {
+    "label": "Things that bounce",
+    "items": [
+      "BALL",
+      "TRAMPOLINE",
+      "KANGAROO",
+      "RUBBER BAND",
+      "SPRING",
+      "YO-YO"
+    ]
+  },
+  {
+    "label": "Things that hop",
+    "items": [
+      "RABBIT",
+      "FROG",
+      "KANGAROO",
+      "GRASSHOPPER",
+      "BUNNY",
+      "CRICKET"
+    ]
+  },
+  {
+    "label": "Things with a box",
+    "items": [
+      "LUNCH",
+      "MAIL",
+      "TOOL",
+      "SAND",
+      "TISSUE",
+      "JUKE",
+      "SHOE"
+    ]
+  },
+  {
+    "label": "Things with a ball",
+    "items": [
+      "BASKET",
+      "FOOT",
+      "BASE",
+      "EYE",
+      "SNOW",
+      "MEAT"
+    ]
+  },
+  {
+    "label": "Things with a board",
+    "items": [
+      "KEY",
+      "SURF",
+      "CARD",
+      "CHESS",
+      "SKATE",
+      "DASH"
+    ]
+  },
+  {
+    "label": "Things with a light",
+    "items": [
+      "FLASH",
+      "SUN",
+      "MOON",
+      "SPOT",
+      "HEAD",
+      "NIGHT"
+    ]
+  },
+  {
+    "label": "Things with a cake",
+    "items": [
+      "PAN",
+      "CUP",
+      "FRUIT",
+      "SHORT",
+      "BEEF",
+      "HOT"
+    ]
+  },
+  {
+    "label": "Things with a berry",
+    "items": [
+      "STRAW",
+      "BLUE",
+      "RASP",
+      "BLACK",
+      "CRAN",
+      "GOOSE"
+    ]
+  },
+  {
+    "label": "Things with a fish",
+    "items": [
+      "GOLD",
+      "JELLY",
+      "SWORD",
+      "STAR",
+      "CAT",
+      "CRAY"
+    ]
+  },
+  {
+    "label": "Things with a house",
+    "items": [
+      "TREE",
+      "DOLL",
+      "LIGHT",
+      "GREEN",
+      "BIRD",
+      "FIRE"
+    ]
+  },
+  {
+    "label": "Things with a bow",
+    "items": [
+      "RAIN",
+      "ELBOW",
+      "CROSS",
+      "LONG"
+    ]
+  },
+  {
+    "label": "Musical instruments",
+    "items": [
+      "GUITAR",
+      "PIANO",
+      "DRUM",
+      "FLUTE",
+      "VIOLIN",
+      "TRUMPET",
+      "HARP",
+      "TROMBONE"
+    ]
+  },
+  {
+    "label": "Things you wear",
+    "items": [
+      "HAT",
+      "SHOE",
+      "GLOVE",
+      "SCARF",
+      "BELT",
+      "SOCK",
+      "JACKET",
+      "MITTEN"
+    ]
+  },
+  {
+    "label": "Types of hats",
+    "items": [
+      "CAP",
+      "BEANIE",
+      "SOMBRERO",
+      "HELMET",
+      "CROWN",
+      "TOP HAT"
+    ]
+  },
+  {
+    "label": "Things at a birthday party",
+    "items": [
+      "CAKE",
+      "BALLOON",
+      "CANDLE",
+      "PRESENT",
+      "CONFETTI",
+      "STREAMER"
+    ]
+  },
+  {
+    "label": "Holiday items",
+    "items": [
+      "CANDLE",
+      "WREATH",
+      "ORNAMENT",
+      "STOCKING",
+      "PUMPKIN",
+      "COSTUME"
+    ]
+  },
+  {
+    "label": "Things you save",
+    "items": [
+      "MONEY",
+      "SEAT",
+      "ENERGY",
+      "TIME",
+      "FILE",
+      "DATE"
+    ]
+  },
+  {
+    "label": "Things you press",
+    "items": [
+      "FLOWER",
+      "SHIRT",
+      "BUTTON",
+      "RECORD",
+      "ELEVATOR",
+      "DOORBELL"
+    ]
+  },
+  {
+    "label": "Things you fold",
+    "items": [
+      "LAUNDRY",
+      "PAPER",
+      "BLANKET",
+      "MAP",
+      "TOWEL",
+      "NAPKIN"
+    ]
+  },
+  {
+    "label": "Things you stack",
+    "items": [
+      "BOOK",
+      "PANCAKE",
+      "BLOCK",
+      "PLATE",
+      "CHAIR",
+      "COIN"
+    ]
+  },
+  {
+    "label": "Things you pour",
+    "items": [
+      "MILK",
+      "WATER",
+      "JUICE",
+      "CEREAL",
+      "SYRUP",
+      "PAINT"
+    ]
+  },
+  {
+    "label": "Things you plant",
+    "items": [
+      "SEED",
+      "FLOWER",
+      "TREE",
+      "GARDEN",
+      "BULB",
+      "VEGETABLE"
+    ]
+  },
+  {
+    "label": "Things you brush",
+    "items": [
+      "TEETH",
+      "HAIR",
+      "PAINT",
+      "HORSE",
+      "CARPET"
+    ]
+  },
+  {
+    "label": "Body parts",
+    "items": [
+      "ARM",
+      "LEG",
+      "ELBOW",
+      "KNEE",
+      "SHOULDER",
+      "ANKLE",
+      "WRIST",
+      "CHIN"
+    ]
+  },
+  {
+    "label": "Family members",
+    "items": [
+      "MOTHER",
+      "FATHER",
+      "SISTER",
+      "BROTHER",
+      "COUSIN",
+      "AUNT",
+      "UNCLE",
+      "GRANDMA"
+    ]
+  },
+  {
+    "label": "Jobs",
+    "items": [
+      "DOCTOR",
+      "TEACHER",
+      "FIREFIGHTER",
+      "CHEF",
+      "FARMER",
+      "PILOT",
+      "NURSE",
+      "DENTIST"
+    ]
+  },
+  {
+    "label": "Emotions",
+    "items": [
+      "HAPPY",
+      "SAD",
+      "ANGRY",
+      "EXCITED",
+      "NERVOUS",
+      "PROUD",
+      "SCARED",
+      "SURPRISED"
+    ]
+  },
+  {
+    "label": "Shapes",
+    "items": [
+      "CIRCLE",
+      "SQUARE",
+      "TRIANGLE",
+      "OVAL",
+      "DIAMOND",
+      "STAR",
+      "HEART",
+      "RECTANGLE"
+    ]
+  },
+  {
+    "label": "Colors",
+    "items": [
+      "RED",
+      "BLUE",
+      "GREEN",
+      "YELLOW",
+      "PURPLE",
+      "ORANGE",
+      "PINK",
+      "BLACK"
+    ]
+  },
+  {
+    "label": "Things in space",
+    "items": [
+      "STAR",
+      "MOON",
+      "PLANET",
+      "COMET",
+      "ROCKET",
+      "ASTRONAUT",
+      "SATELLITE"
+    ]
+  },
+  {
+    "label": "Planets",
+    "items": [
+      "MARS",
+      "VENUS",
+      "EARTH",
+      "SATURN",
+      "JUPITER",
+      "NEPTUNE",
+      "MERCURY"
+    ]
+  },
+  {
+    "label": "Weather events",
+    "items": [
+      "STORM",
+      "BLIZZARD",
+      "DROUGHT",
+      "RAINBOW",
+      "TORNADO",
+      "HURRICANE"
+    ]
+  },
+  {
+    "label": "Types of dogs",
+    "items": [
+      "POODLE",
+      "BEAGLE",
+      "BULLDOG",
+      "COLLIE",
+      "LABRADOR",
+      "DALMATIAN"
+    ]
+  },
+  {
+    "label": "Superheroes",
+    "items": [
+      "BATMAN",
+      "SUPERMAN",
+      "SPIDERMAN",
+      "HULK",
+      "FLASH",
+      "THOR"
+    ]
+  },
+  {
+    "label": "Days you go to school",
+    "items": [
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY"
+    ]
+  },
+  {
+    "label": "Things at a market",
+    "items": [
+      "STALL",
+      "SCALE",
+      "BASKET",
+      "VENDOR",
+      "CART",
+      "SIGN"
+    ]
+  },
+  {
+    "label": "Things at an airport",
+    "items": [
+      "GATE",
+      "RUNWAY",
+      "LUGGAGE",
+      "TICKET",
+      "PILOT",
+      "TERMINAL"
+    ]
+  },
+  {
+    "label": "Types of bread",
+    "items": [
+      "WHITE",
+      "WHEAT",
+      "RYE",
+      "SOURDOUGH",
+      "BAGEL",
+      "ROLL"
+    ]
+  },
+  {
+    "label": "Types of pasta",
+    "items": [
+      "PENNE",
+      "SPAGHETTI",
+      "MACARONI",
+      "NOODLE",
+      "RAVIOLI",
+      "LASAGNA"
+    ]
+  },
+  {
+    "label": "Things that are striped",
+    "items": [
+      "ZEBRA",
+      "BEE",
+      "CANDY CANE",
+      "REFEREE",
+      "TIGER",
+      "FLAG"
+    ]
+  },
+  {
+    "label": "Things that are spotted",
+    "items": [
+      "LEOPARD",
+      "DALMATIAN",
+      "LADYBUG",
+      "GIRAFFE",
+      "FROG"
+    ]
+  },
+  {
+    "label": "First aid items",
+    "items": [
+      "BANDAGE",
+      "GAUZE",
+      "TAPE",
+      "OINTMENT",
+      "ICE PACK",
+      "SPLINT"
+    ]
+  },
+  {
+    "label": "Doctor visit items",
+    "items": [
+      "STETHOSCOPE",
+      "THERMOMETER",
+      "BANDAGE",
+      "SYRINGE",
+      "SCALE"
+    ]
+  },
+  {
+    "label": "Things that are fragile",
+    "items": [
+      "GLASS",
+      "EGG",
+      "VASE",
+      "ICICLE",
+      "BUBBLE",
+      "ORNAMENT"
+    ]
+  },
+  {
+    "label": "Things that are heavy",
+    "items": [
+      "ANVIL",
+      "ELEPHANT",
+      "BOULDER",
+      "PIANO",
+      "BRICK",
+      "TRUCK"
+    ]
+  },
+  {
+    "label": "Things that float",
+    "items": [
+      "BOAT",
+      "BALLOON",
+      "LEAF",
+      "DUCK",
+      "CORK",
+      "RAFT"
+    ]
+  },
+  {
+    "label": "Things that sink",
+    "items": [
+      "ROCK",
+      "ANCHOR",
+      "COIN",
+      "BRICK",
+      "STONE"
+    ]
+  },
+  {
+    "label": "Things you find in a garden",
+    "items": [
+      "FLOWER",
+      "WEED",
+      "HOSE",
+      "SHOVEL",
+      "BEE",
+      "BUTTERFLY"
+    ]
+  },
+  {
+    "label": "Types of flowers",
+    "items": [
+      "ROSE",
+      "TULIP",
+      "DAISY",
+      "SUNFLOWER",
+      "LILY",
+      "DANDELION"
+    ]
+  },
+  {
+    "label": "Types of trees",
+    "items": [
+      "OAK",
+      "PINE",
+      "MAPLE",
+      "PALM",
+      "WILLOW",
+      "BIRCH"
+    ]
+  },
+  {
+    "label": "Barnyard sounds",
+    "items": [
+      "MOO",
+      "OINK",
+      "CLUCK",
+      "NEIGH",
+      "BAA",
+      "QUACK"
+    ]
+  },
+  {
+    "label": "Things that are yellow",
+    "items": [
+      "BANANA",
+      "SUN",
+      "LEMON",
+      "DUCKLING",
+      "SCHOOL BUS",
+      "CHEESE"
+    ]
+  },
+  {
+    "label": "Things that are golden",
+    "items": [
+      "HONEY",
+      "WHEAT",
+      "SUNSET",
+      "RETRIEVER",
+      "MEDAL",
+      "CROWN"
+    ]
+  },
+  {
+    "label": "Things that are green",
+    "items": [
+      "GRASS",
+      "FROG",
+      "LEAF",
+      "PICKLE",
+      "LIME",
+      "EMERALD"
+    ]
+  },
+  {
+    "label": "Things that are orange",
+    "items": [
+      "PUMPKIN",
+      "CARROT",
+      "TIGER",
+      "BASKETBALL",
+      "TRAFFIC CONE"
+    ]
+  },
+  {
+    "label": "Things at a campfire",
+    "items": [
+      "MARSHMALLOW",
+      "STORY",
+      "LOG",
+      "SPARK",
+      "SMOKE",
+      "SONG"
+    ]
+  },
+  {
+    "label": "Ice cream flavors",
+    "items": [
+      "VANILLA",
+      "CHOCOLATE",
+      "STRAWBERRY",
+      "MINT",
+      "COOKIE DOUGH"
+    ]
+  },
+  {
+    "label": "Things that are noisy at night",
+    "items": [
+      "CRICKET",
+      "OWL",
+      "FROG",
+      "THUNDER",
+      "SIREN"
+    ]
+  },
+  {
+    "label": "Things a firefighter uses",
+    "items": [
+      "HOSE",
+      "LADDER",
+      "HELMET",
+      "ALARM",
+      "TRUCK",
+      "AXE"
+    ]
+  },
+  {
+    "label": "Things a mail carrier delivers",
+    "items": [
+      "LETTER",
+      "PACKAGE",
+      "POSTCARD",
+      "MAGAZINE",
+      "BILL"
+    ]
+  },
+  {
+    "label": "Things at a picnic",
+    "items": [
+      "BLANKET",
+      "BASKET",
+      "SANDWICH",
+      "ANT",
+      "LEMONADE"
+    ]
+  },
+  {
+    "label": "Things that are bumpy",
+    "items": [
+      "ROAD",
+      "PICKLE",
+      "GOLF BALL",
+      "ALLIGATOR",
+      "PINEAPPLE"
+    ]
+  },
+  {
+    "label": "Things that are shiny",
+    "items": [
+      "DIAMOND",
+      "MIRROR",
+      "STAR",
+      "COIN",
+      "TROPHY",
+      "GLITTER"
+    ]
+  },
+  {
+    "label": "Types of hats for winter",
+    "items": [
+      "BEANIE",
+      "EARFLAP",
+      "KNIT CAP",
+      "BOMBER"
+    ]
+  },
+  {
+    "label": "Circus performers",
+    "items": [
+      "CLOWN",
+      "ACROBAT",
+      "JUGGLER",
+      "RINGMASTER",
+      "TAMER"
+    ]
+  },
+  {
+    "label": "Things at a construction site",
+    "items": [
+      "CRANE",
+      "HELMET",
+      "BULLDOZER",
+      "BRICK",
+      "LADDER"
+    ]
+  }
+]
